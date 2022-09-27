@@ -20,7 +20,7 @@ export function useApi() {
         ...content,
         headers: {
           ...headers,
-          Authorization: "Basic " + base64.encode(`${user}=${pass}`),
+          Authorization: `Basic ${base64.encode(`${user}:${pass}`)}`,
         },
       });
       const data = await response.json();

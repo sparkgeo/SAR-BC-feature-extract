@@ -1,29 +1,10 @@
 import React from "react";
 import { saveAs } from "file-saver";
-
-const sampleExtraction = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [1.7578125, -2.811371193331128],
-            [69.9609375, -2.811371193331128],
-            [69.9609375, 51.6180165487737],
-            [1.7578125, 51.6180165487737],
-            [1.7578125, -2.811371193331128],
-          ],
-        ],
-      },
-    },
-  ],
-};
+import { useApi } from "./hooks/useApi";
 
 function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
+  const { api, loading, error } = useApi();
+
   const NumberIndicator = ({ children }) => (
     <div className="bg-emerald-600 text-white text-xl rounded-full p-2 w-10 h-10 flex justify-center items-center">
       {children}
@@ -35,39 +16,38 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
   };
 
   async function downloading() {
-    const files = [];
     const { roads, trails, shelters } = layersVisible;
+    const [[xMin, yMax], [xMax, yMin]] = mapBounds;
 
     try {
       if (shelters) {
-        // const [[xMin, yMax], [xMax, yMin]] = mapBounds;
-        // const uname = "username";
-        // const pword = "password";
-        // const url = `http://ecsal-albfa-1i6jhj514tazu-125558200.us-west-2.elb.amazonaws.com/Shelters/export/${xMin}/${yMin}/${xMax}/${yMax}`;
-        // const response = await fetch(url, {
-        //   headers: {
-        //     Authorization: "Basic " + base64.encode(uname + ":" + pword),
-        //   },
-        // });
-        // const data = await response.json();
-        // console.log("Url ", data);
+        const data = await api(
+          `/Shelters/export/${xMin}/${yMin}/${xMax}/${yMax}`
+        );
 
-        var blob = new Blob([JSON.stringify(sampleExtraction)], {
+        var blob = new Blob([JSON.stringify(data)], {
           type: "text/plain;charset=utf-8",
         });
         saveAs(blob, "extracted-shelters.json");
       }
       if (trails) {
-        var blob = new Blob([JSON.stringify(sampleExtraction)], {
+        const data = await api(
+          `/Trails/export/${xMin}/${yMin}/${xMax}/${yMax}`
+        );
+
+        var blob = new Blob([JSON.stringify(data)], {
           type: "text/plain;charset=utf-8",
         });
         saveAs(blob, "extracted-trails.json");
       }
       if (roads) {
-        var blob = new Blob([JSON.stringify(sampleExtraction)], {
+        const data = await api(
+          `/Resource Roads/export/${xMin}/${yMin}/${xMax}/${yMax}`
+        );
+        var blob = new Blob([JSON.stringify(data)], {
           type: "text/plain;charset=utf-8",
         });
-        saveAs(blob, "extracted-roads.json");
+        saveAs(blob, "extracted-resource-roads.json");
       }
     } catch (e) {
       console.error(e);
