@@ -1,6 +1,7 @@
 import React from "react";
 import { saveAs } from "file-saver";
 import { useApi } from "./hooks/useApi";
+import ButtonLoading from "./ButtonLoading";
 
 function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
   const { api, loading, error } = useApi();
@@ -106,20 +107,23 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
         <NumberIndicator>3</NumberIndicator>
         <span className="ml-2 text-xl">Download the data</span>
       </div>
-
-      <button
-        onClick={downloading}
-        disabled={
-          !(
-            layersVisible.shelters ||
-            layersVisible.roads ||
-            layersVisible.trails
-          )
-        }
-        className="bg-emerald-500 text-white p-4"
-      >
-        download
-      </button>
+      {loading ? (
+        <ButtonLoading />
+      ) : (
+        <button
+          onClick={downloading}
+          disabled={
+            !(
+              layersVisible.shelters ||
+              layersVisible.roads ||
+              layersVisible.trails
+            )
+          }
+          className="bg-emerald-500 text-white p-4"
+        >
+          download
+        </button>
+      )}
 
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>4</NumberIndicator>
