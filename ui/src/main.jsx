@@ -1,5 +1,11 @@
 import { render } from "preact";
 import { App } from "./App";
+import { AuthContextProvider } from "./AuthContext";
 import "./index.css";
 
-render(<App />, document.getElementById("app"));
+render(
+  <AuthContextProvider>
+    <App />
+  </AuthContextProvider>,
+  document.getElementById("app")
+);

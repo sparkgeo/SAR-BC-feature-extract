@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "base-64": "^1.0.0",
     "file-saver": "^2.0.5",
     "flatgeobuf": "^3.23.1",
     "mapbox-gl": "^2.10.0",
