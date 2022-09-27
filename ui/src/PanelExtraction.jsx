@@ -107,23 +107,25 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
         <NumberIndicator>3</NumberIndicator>
         <span className="ml-2 text-xl">Download the data</span>
       </div>
-      {loading ? (
-        <ButtonLoading />
-      ) : (
-        <button
-          onClick={downloading}
-          disabled={
-            !(
-              layersVisible.shelters ||
-              layersVisible.roads ||
-              layersVisible.trails
-            )
-          }
-          className="bg-emerald-500 text-white p-4"
-        >
-          download
-        </button>
-      )}
+      <div className="w-full flex justify-center">
+        {loading ? (
+          <ButtonLoading />
+        ) : (
+          <button
+            onClick={downloading}
+            disabled={
+              !(
+                layersVisible.shelters ||
+                layersVisible.roads ||
+                layersVisible.trails
+              )
+            }
+            className="bg-emerald-500 text-white p-4"
+          >
+            download
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>4</NumberIndicator>

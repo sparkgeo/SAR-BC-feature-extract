@@ -4,7 +4,7 @@ import React from "react";
 function ButtonLoading() {
   return (
     <button className="flex items-center p-4 justify-evenly">
-      <span>loading</span>
+      <span className="mr-3 capitalize">loading</span>
       <div role="status">
         <svg
           aria-hidden="true"
