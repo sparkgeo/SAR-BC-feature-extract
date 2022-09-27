@@ -1,4 +1,4 @@
-import { useState, useContext } from "preact/hooks";
+import { useState, useContext, useEffect } from "preact/hooks";
 import { AuthContext } from "./AuthContext";
 import base64 from "base-64";
 import ButtonLoading from "./ButtonLoading";
@@ -8,14 +8,8 @@ function ModalAuthentication() {
   const [error, setError] = useState("");
   const { setAuthenticated, setAuthParams } = useContext(AuthContext);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function authenticate({ user, pass }) {
     setLoading(true);
-
-    const {
-      target: [{ value: user }, { value: pass }],
-    } = event;
-
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE}/list`, {
         headers: { Authorization: "Basic " + base64.encode(`${user}:${pass}`) },
@@ -27,6 +21,7 @@ function ModalAuthentication() {
       } else if (response.status === 200) {
         // const data = await response.json();
         setAuthParams({ user, pass });
+        localStorage.setItem("auth", JSON.stringify({ user, pass }));
         setAuthenticated(true);
       } else {
         setError("server");
@@ -37,6 +32,20 @@ function ModalAuthentication() {
       setLoading(false);
     }
   }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const {
+      target: [{ value: user }, { value: pass }],
+    } = event;
+    authenticate({ user, pass });
+  }
+
+  useEffect(() => {
+    const { user, pass } = JSON.parse(localStorage.getItem("auth") ?? "{}");
+    if (user && pass) authenticate({ user, pass });
+  }, []);
 
   const Error = ({ type }) => {
     return (
