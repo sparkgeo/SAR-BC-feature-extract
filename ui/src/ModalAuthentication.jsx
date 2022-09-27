@@ -4,11 +4,12 @@ import base64 from "base-64";
 import ButtonLoading from "./ButtonLoading";
 
 function ModalAuthentication() {
+  const [appLoading, setAppLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { setAuthenticated, setAuthParams } = useContext(AuthContext);
 
-  async function authenticate({ user, pass }) {
+  async function authenticate({ user, pass, modalBypass = false }) {
     setLoading(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE}/list`, {
@@ -27,9 +28,11 @@ function ModalAuthentication() {
         setError("server");
         setLoading(false);
       }
+      if (modalBypass) setAppLoading(false);
     } catch (e) {
       setError("server");
       setLoading(false);
+      setAppLoading(false);
     }
   }
 
@@ -44,7 +47,11 @@ function ModalAuthentication() {
 
   useEffect(() => {
     const { user, pass } = JSON.parse(localStorage.getItem("auth") ?? "{}");
-    if (user && pass) authenticate({ user, pass });
+    if (user && pass) {
+      authenticate({ user, pass, modalBypass: true });
+    } else {
+      setAppLoading(false);
+    }
   }, []);
 
   const Error = ({ type }) => {
@@ -67,6 +74,8 @@ function ModalAuthentication() {
       scelerisque consequat. Suspendisse aliquam metus a risus fringilla rhoncus
     </div>
   );
+
+  if (appLoading) return;
 
   return (
     <div
