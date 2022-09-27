@@ -56,18 +56,24 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
     }
   }
 
+  const disabled = !(
+    layersVisible.shelters ||
+    layersVisible.roads ||
+    layersVisible.trails
+  );
+
   return (
-    <section className="fixed z-20 right-10 bottom-20 p-4 bg-white">
-      <h2 className="text-2xl my-2">To get stuff on SARTopo, do this:</h2>
+    <section className="rounded-lg fixed z-20 right-10 bottom-20 px-4 pb-6 bg-white shadow-xl">
+      <h2 className="text-2xl my-2">Add more content to SARTopo:</h2>
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>1</NumberIndicator>
-        <span className="ml-2 text-xl">Pan to Area of Interest</span>
+        <span className="ml-4 text-xl">Pan map to Area of Interest</span>
       </div>
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>2</NumberIndicator>
-        <span className="ml-2 text-xl">Select Datasets</span>
+        <span className="ml-4 text-xl">Select Datasets</span>
       </div>
-      <div className="ml-12 select-none">
+      <div className="ml-12 select-none grid grid-cols-3 gap-x-2">
         <div className="flex flex-row">
           <input
             type="checkbox"
@@ -105,7 +111,7 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
 
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>3</NumberIndicator>
-        <span className="ml-2 text-xl">Download the data</span>
+        <span className="ml-4 text-xl">Download the data</span>
       </div>
       <div className="w-full flex justify-center">
         {loading ? (
@@ -113,14 +119,10 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
         ) : (
           <button
             onClick={downloading}
-            disabled={
-              !(
-                layersVisible.shelters ||
-                layersVisible.roads ||
-                layersVisible.trails
-              )
-            }
-            className="bg-emerald-500 text-white p-4"
+            disabled={disabled}
+            className={`capitalize bg-emerald-${
+              disabled ? "300 cursor-not-allowed" : "500"
+            } text-white p-4`}
           >
             download
           </button>
@@ -129,8 +131,10 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
 
       <div className="flex flex-row items-center my-2">
         <NumberIndicator>4</NumberIndicator>
-        <span className="ml-2 text-xl">Import unzipped data into SAR Topo</span>
+        <span className="ml-4 text-xl">Import the downloads into SarTOPO</span>
       </div>
+      <div className="hidden bg-emerald-300" />
+      <div className="hidden bg-emerald-500 cursor-not-allowed" />
     </section>
   );
 }
