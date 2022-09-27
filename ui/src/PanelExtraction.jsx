@@ -1,10 +1,15 @@
-import React from "react";
+import { useState } from "preact/hooks";
 import { saveAs } from "file-saver";
 import { useApi } from "./hooks/useApi";
 import ButtonLoading from "./ButtonLoading";
 
 function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
-  const { api, loading, error } = useApi();
+  const [errors, setErrors] = useState({
+    trails: false,
+    roads: false,
+    shelters: false,
+  });
+  const { api, loading } = useApi();
 
   const NumberIndicator = ({ children }) => (
     <div className="bg-emerald-600 text-white text-xl rounded-full p-2 w-10 h-10 flex justify-center items-center">
@@ -20,8 +25,8 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
     const { roads, trails, shelters } = layersVisible;
     const [[xMin, yMax], [xMax, yMin]] = mapBounds;
 
-    try {
-      if (shelters) {
+    if (shelters) {
+      try {
         const data = await api(
           `/Shelters/export/${xMin}/${yMin}/${xMax}/${yMax}`
         );
@@ -30,8 +35,12 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
           type: "text/plain;charset=utf-8",
         });
         saveAs(blob, "extracted-shelters.json");
+      } catch (e) {
+        setErrors({ ...errors, shelters: true });
       }
-      if (trails) {
+    }
+    if (trails) {
+      try {
         const data = await api(
           `/Trails/export/${xMin}/${yMin}/${xMax}/${yMax}`
         );
@@ -40,8 +49,12 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
           type: "text/plain;charset=utf-8",
         });
         saveAs(blob, "extracted-trails.json");
+      } catch (e) {
+        setErrors({ ...errors, trails: true });
       }
-      if (roads) {
+    }
+    if (roads) {
+      try {
         const data = await api(
           `/Resource Roads/export/${xMin}/${yMin}/${xMax}/${yMax}`
         );
@@ -49,10 +62,9 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
           type: "text/plain;charset=utf-8",
         });
         saveAs(blob, "extracted-resource-roads.json");
+      } catch (e) {
+        setErrors({ ...errors, roads: true });
       }
-    } catch (e) {
-      console.error(e);
-      throw new Error("unable to download");
     }
   }
 
