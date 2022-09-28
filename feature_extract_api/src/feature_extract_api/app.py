@@ -30,10 +30,10 @@ def check_credentials(credentials: HTTPBasicCredentials = Depends(auth)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-app = FastAPI(docs_url="/", dependencies=[Depends(check_credentials)])
+app = FastAPI(docs_url="/")
 
 
-@app.get("/{dataset}/export/{x_min}/{y_min}/{x_max}/{y_max}")
+@app.get("/{dataset}/export/{x_min}/{y_min}/{x_max}/{y_max}", dependencies=[Depends(check_credentials)])
 async def export(dataset: str, x_min: float, y_min: float, x_max: float, y_max: float) -> FileResponse:
     return FileResponse(
         get_features_file_path(
@@ -49,7 +49,7 @@ async def export(dataset: str, x_min: float, y_min: float, x_max: float, y_max: 
     )
 
 
-@app.get("/{dataset}/count/{x_min}/{y_min}/{x_max}/{y_max}")
+@app.get("/{dataset}/count/{x_min}/{y_min}/{x_max}/{y_max}", dependencies=[Depends(check_credentials)])
 async def count(dataset: str, x_min: float, y_min: float, x_max: float, y_max: float) -> int:
     return count_features(
         ExtractParameters(
@@ -91,7 +91,7 @@ async def fgb_proxy(dataset: str, range: Union[str, None] = Header(default=None)
     )
 
 
-@app.get("/list")
+@app.get("/list", dependencies=[Depends(check_credentials)])
 async def export_types() -> List[str]:
     return list_datasets()
 
