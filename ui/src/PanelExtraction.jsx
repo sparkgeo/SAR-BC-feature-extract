@@ -77,74 +77,84 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
   return (
     <section className="rounded-lg fixed z-20 right-10 bottom-20 px-4 pb-6 bg-white shadow-xl">
       <h2 className="text-2xl my-2">Add more content to SARTopo:</h2>
-      <div className="flex flex-row items-center my-2">
-        <NumberIndicator>1</NumberIndicator>
-        <span className="ml-4 text-xl">Pan map to Area of Interest</span>
-      </div>
-      <div className="flex flex-row items-center my-2">
-        <NumberIndicator>2</NumberIndicator>
-        <span className="ml-4 text-xl">Select Datasets</span>
-      </div>
-      <div className="ml-12 select-none grid grid-cols-3 gap-x-2">
-        <div className="flex flex-row">
-          <input
-            type="checkbox"
-            name=""
-            id="layer1"
-            className="mr-2"
-            checked={layersVisible.shelters}
-            onChange={handleLayerSelect("shelters")}
-          />
-          <label htmlFor="layer1">shelters</label>
-        </div>
-        <div className="flex flex-row">
-          <input
-            type="checkbox"
-            name=""
-            id="layer2"
-            className="mr-2"
-            checked={layersVisible.roads}
-            onChange={handleLayerSelect("roads")}
-          />
-          <label htmlFor="layer2">roads</label>
-        </div>
-        <div className="flex flex-row">
-          <input
-            type="checkbox"
-            name=""
-            id="layer3"
-            className="mr-2"
-            checked={layersVisible.trails}
-            onChange={handleLayerSelect("trails")}
-          />
-          <label htmlFor="layer3">trails</label>
-        </div>
-      </div>
+      <ul>
+        <li className="my-2 py-2">
+          <div className="flex flex-row items-center my-2">
+            <NumberIndicator>1</NumberIndicator>
+            <span className="ml-4 text-xl">Pan map to Area of Interest</span>
+          </div>
+        </li>
+        <li className="my-2 border-t border-t-gray-400 py-2">
+          <div className="flex flex-row items-center my-2">
+            <NumberIndicator>2</NumberIndicator>
+            <span className="ml-4 text-xl">Select Datasets</span>
+          </div>{" "}
+          <div className="ml-12 select-none grid grid-cols-3 gap-x-2">
+            <div className="flex flex-row">
+              <input
+                type="checkbox"
+                name=""
+                id="layer1"
+                className="mr-2"
+                checked={layersVisible.shelters}
+                onChange={handleLayerSelect("shelters")}
+              />
+              <label htmlFor="layer1">shelters</label>
+            </div>
+            <div className="flex flex-row">
+              <input
+                type="checkbox"
+                name=""
+                id="layer2"
+                className="mr-2"
+                checked={layersVisible.roads}
+                onChange={handleLayerSelect("roads")}
+              />
+              <label htmlFor="layer2">roads</label>
+            </div>
+            <div className="flex flex-row">
+              <input
+                type="checkbox"
+                name=""
+                id="layer3"
+                className="mr-2"
+                checked={layersVisible.trails}
+                onChange={handleLayerSelect("trails")}
+              />
+              <label htmlFor="layer3">trails</label>
+            </div>
+          </div>
+        </li>
+        <li className="my-2 py-2 border-t border-t-gray-400">
+          {" "}
+          <div className="flex flex-row items-center my-2">
+            <NumberIndicator>3</NumberIndicator>
+            <span className="ml-4 text-xl">Download the data</span>
+          </div>
+          <div className="w-full flex justify-center">
+            {loading ? (
+              <ButtonLoading />
+            ) : (
+              <button
+                onClick={downloading}
+                disabled={disabled}
+                className={`capitalize bg-emerald-${
+                  disabled ? "300 cursor-not-allowed" : "500"
+                } text-white p-4`}
+              >
+                download
+              </button>
+            )}
+          </div>
+        </li>
+        <li className="my-2 py-2 border-t border-t-gray-500">
+          <div className="flex flex-row items-center my-2">
+            <NumberIndicator>4</NumberIndicator>
+            <span className="ml-4 text-xl">Import downloads into SarTOPO</span>
+          </div>
+        </li>
+      </ul>
 
-      <div className="flex flex-row items-center my-2">
-        <NumberIndicator>3</NumberIndicator>
-        <span className="ml-4 text-xl">Download the data</span>
-      </div>
-      <div className="w-full flex justify-center">
-        {loading ? (
-          <ButtonLoading />
-        ) : (
-          <button
-            onClick={downloading}
-            disabled={disabled}
-            className={`capitalize bg-emerald-${
-              disabled ? "300 cursor-not-allowed" : "500"
-            } text-white p-4`}
-          >
-            download
-          </button>
-        )}
-      </div>
-
-      <div className="flex flex-row items-center my-2">
-        <NumberIndicator>4</NumberIndicator>
-        <span className="ml-4 text-xl">Import the downloads into SarTOPO</span>
-      </div>
       <div className="hidden bg-emerald-300" />
       <div className="hidden bg-emerald-500 cursor-not-allowed" />
     </section>
