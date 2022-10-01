@@ -58,7 +58,7 @@ def get_features_from_layer(
     # temp_layer holds the filtered geometries from source_layer
     temp_datasource = memory_driver.CreateDataSource("")
     temp_layer = temp_datasource.CreateLayer("result_layer", geom_type=source_layer.GetGeomType())
-    
+
     # clip_layer defines the clipping boundary
     clip_datasource = memory_driver.CreateDataSource("")
     clip_layer = clip_datasource.CreateLayer("clip_layer", geom_type=ogr.wkbPolygon)
