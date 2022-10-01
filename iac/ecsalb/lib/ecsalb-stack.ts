@@ -58,7 +58,9 @@ export class EcsalbStack extends cdk.Stack {
       desiredCount: 1,
       idleTimeout: Duration.minutes(5),
       taskImageOptions: {
-        image: ContainerImage.fromAsset(path.join(__dirname, "..", "..", "..")),
+        image: ContainerImage.fromAsset(path.join(__dirname, "..", "..", ".."), {
+          "file": path.join("feature_extract_api", "Dockerfile")
+        }),
         containerPort: 80,
         logDriver: LogDriver.awsLogs({
           streamPrefix: EcsalbStack.appName,
