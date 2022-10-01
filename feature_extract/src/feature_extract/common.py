@@ -54,6 +54,12 @@ def get_features_from_layer(
     y_max: float,
 ) -> None:
     memory_driver = ogr.GetDriverByName("Memory")
+
+    # temp_layer holds the filtered geometries from source_layer
+    temp_datasource = memory_driver.CreateDataSource("")
+    temp_layer = temp_datasource.CreateLayer("result_layer", geom_type=source_layer.GetGeomType())
+    
+    # clip_layer defines the clipping boundary
     clip_datasource = memory_driver.CreateDataSource("")
     clip_layer = clip_datasource.CreateLayer("clip_layer", geom_type=ogr.wkbPolygon)
     clip_geom = ogr.CreateGeometryFromWkt(
@@ -67,23 +73,24 @@ def get_features_from_layer(
     feature.SetGeometry(clip_geom)
     clip_layer.CreateFeature(feature)
 
-    result_datasource = memory_driver.CreateDataSource("")
-    result_layer = result_datasource.CreateLayer("result_layer", geom_type=ogr.wkbMultiLineString)
-    ogr.Layer.Clip(source_layer, clip_layer, result_layer)
-
+    # copy each boundary-filtered feature from source_layer to temp_layer
     id_field = ogr.FieldDefn(id_field_name, ogr.OFTInteger64)
     title_field = ogr.FieldDefn(title_field_name, ogr.OFTString)
     title_field.SetWidth(title_field_width)
-    destination_layer.CreateField(id_field)
-    destination_layer.CreateField(title_field)
-    while feature := result_layer.GetNextFeature():
+    temp_layer.CreateField(id_field)
+    temp_layer.CreateField(title_field)
+    source_layer.SetSpatialFilterRect(x_min, y_min, x_max, y_max)
+    while feature := source_layer.GetNextFeature():
         geometry_ref = feature.GetGeometryRef()
         new_geometry = geometry_ref.Clone()
-        new_feature = ogr.Feature(destination_layer.GetLayerDefn())
+        new_feature = ogr.Feature(temp_layer.GetLayerDefn())
         new_feature.SetGeometryDirectly(new_geometry)
         new_feature.SetField(id_field_name, feature.GetFID())
         new_feature.SetField(title_field_name, title_provider(feature)[0:title_field_width])
-        destination_layer.CreateFeature(new_feature)
+        temp_layer.CreateFeature(new_feature)
+
+    # clip temp_layer to the clipping boundary and transfer the result to destination_layer
+    ogr.Layer.Clip(temp_layer, clip_layer, destination_layer)
 
 
 def get_dataset_providers() -> List[DatasetProvider]:
