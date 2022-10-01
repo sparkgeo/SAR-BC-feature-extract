@@ -3,7 +3,9 @@ from typing import Callable, List
 
 from osgeo import ogr, osr
 
+from feature_extract.datasets.dataset_info import DatasetInfo
 from feature_extract.datasets.dataset_provider import DatasetProvider
+from feature_extract.datasets.geometry_type import GeometryType
 from feature_extract.extract_handler import ExtractHandler
 from feature_extract.settings import settings
 
@@ -21,12 +23,25 @@ handlers = {}
 def register_handler(handler: DatasetProvider) -> None:
     handlers[handler.get_dataset_name()] = ExtractHandler(
         dataset_provider=handler,
-        feature_type=ogr.wkbMultiLineString,
+        feature_type=handler.get_ogr_type(),
     )
 
 
-def list_datasets() -> List[str]:
-    return list(handlers.keys())
+def list_datasets() -> List[DatasetInfo]:
+    feature_type_map = {
+        ogr.wkbPoint: GeometryType.POINT,
+        ogr.wkbMultiLineString: GeometryType.LINE,
+    }
+    try:
+        return [
+            DatasetInfo(
+                name=key,
+                type=feature_type_map[value.feature_type],
+            )
+            for key, value in handlers.items()
+        ]
+    except KeyError as e:
+        raise Exception(f"Unable to map feature_type to geometry_type: {e}")
 
 
 def get_features_from_layer(

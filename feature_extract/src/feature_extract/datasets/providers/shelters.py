@@ -43,5 +43,8 @@ class Shelters(DatasetProvider):
     def get_file_path(self) -> str:
         return self.fgb_path
 
+    def get_ogr_type(self) -> int:
+        return ogr.wkbPoint
+
 
 register_handler(Shelters())

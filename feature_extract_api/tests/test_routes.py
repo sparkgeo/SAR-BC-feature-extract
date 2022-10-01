@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 
 from feature_extract.common import list_datasets
+from feature_extract.datasets.geometry_type import GeometryType
 from feature_extract.datasets.providers.resource_roads import ResourceRoads
 from feature_extract.extract_parameters import ExtractParameters
 
@@ -31,6 +32,9 @@ def test_list():
     assert response.status_code == 200
     response_datasets = response.json()
     assert len(response_datasets) == len(list_datasets())
+    for dataset in response_datasets:
+        assert "type" in dataset
+        assert dataset["type"] in [type.value for type in GeometryType]
 
 
 @mock.patch("feature_extract_api.app.count_features")
