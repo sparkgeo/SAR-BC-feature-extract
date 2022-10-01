@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class ExtractParameters(BaseModel):
@@ -8,3 +8,7 @@ class ExtractParameters(BaseModel):
     lon_min: float
     lon_max: float
     dataset: str
+
+    @validator("dataset")
+    def normalise_dataset(value: str):
+        return value.lower()

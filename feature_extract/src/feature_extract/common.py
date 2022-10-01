@@ -21,7 +21,7 @@ handlers = {}
 
 
 def register_handler(handler: DatasetProvider) -> None:
-    handlers[handler.get_dataset_name()] = ExtractHandler(
+    handlers[handler.get_dataset_name().lower()] = ExtractHandler(
         dataset_provider=handler,
         feature_type=handler.get_ogr_type(),
     )
@@ -35,10 +35,10 @@ def list_datasets() -> List[DatasetInfo]:
     try:
         return [
             DatasetInfo(
-                name=key,
+                name=value.dataset_provider.get_dataset_name(),
                 type=feature_type_map[value.feature_type],
             )
-            for key, value in handlers.items()
+            for value in handlers.values()
         ]
     except KeyError as e:
         raise Exception(f"Unable to map feature_type to geometry_type: {e}")
