@@ -9,6 +9,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from feature_extract.byte_range_parameters import ByteRangeParameters
 from feature_extract.common import list_datasets
+from feature_extract.datasets.dataset_info import DatasetInfo
 from feature_extract.exceptions.unsupported_dataset import UnsupportedDatasetException
 from feature_extract.extract_parameters import ExtractParameters
 from feature_extract.retriever import count_features, get_bytes, get_features_file_path
@@ -91,8 +92,8 @@ async def fgb_proxy(dataset: str, range: Union[str, None] = Header(default=None)
     )
 
 
-@app.get("/list", dependencies=[Depends(check_credentials)])
-async def export_types() -> List[str]:
+@app.get("/list", dependencies=[Depends(check_credentials)], response_model=List[DatasetInfo])
+async def export_types() -> List[DatasetInfo]:
     return list_datasets()
 
 
