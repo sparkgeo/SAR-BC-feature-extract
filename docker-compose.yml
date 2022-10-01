@@ -5,6 +5,7 @@ services:
   api:
     build:
       context: .
+      dockerfile: ./feature_extract_api/Dockerfile
     environment:
       creds_hash: ${creds_hash}
     volumes:

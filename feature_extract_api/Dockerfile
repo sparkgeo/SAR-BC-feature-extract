@@ -4,6 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update --fix-missing \
   && apt-get install -y --no-install-recommends \
      build-essential \
+     curl \
      python3-dev \
      python3-pip \
   && apt-get clean

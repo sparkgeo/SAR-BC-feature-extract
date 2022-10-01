@@ -1,5 +1,6 @@
 feature_extract/data/**
 feature_extract/tests
 feature_extract_api/tests
+ui/node_modules
 scripts
 iac
