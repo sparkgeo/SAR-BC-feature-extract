@@ -5,7 +5,10 @@ from re import escape, sub
 from boto3 import session
 
 from feature_extract.byte_range_response import ByteRangeResponse
-from feature_extract.datasets.dataset_parameters import DatasetParameters
+from feature_extract.datasets.dataset_parameters import (
+    DatasetExportParameters,
+    DatasetParameters,
+)
 
 
 class DatasetProvider(ABC):
@@ -23,7 +26,11 @@ class DatasetProvider(ABC):
             self.bucket_name = "/".join(self.data_access_prefix.split("/")[2:])
 
     @abstractmethod
-    def export_data(self, parameters: DatasetParameters) -> None:
+    def export_data(self, parameters: DatasetExportParameters) -> None:
+        pass
+
+    @abstractmethod
+    def count_features(self, parameters: DatasetParameters) -> int:
         pass
 
     @abstractmethod
