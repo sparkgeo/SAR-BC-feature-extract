@@ -93,5 +93,16 @@ def get_features_from_layer(
     ogr.Layer.Clip(temp_layer, clip_layer, destination_layer)
 
 
+def count_features_in_layer(
+    source_layer: ogr.Layer,
+    x_min: float,
+    y_min: float,
+    x_max: float,
+    y_max: float,
+) -> int:
+    source_layer.SetSpatialFilterRect(x_min, y_min, x_max, y_max)
+    return source_layer.GetFeatureCount()
+
+
 def get_dataset_providers() -> List[DatasetProvider]:
     return [provider.dataset_provider for provider in handlers.values()]

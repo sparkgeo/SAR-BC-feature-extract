@@ -8,7 +8,10 @@ from osgeo import ogr
 from feature_extract.byte_range_parameters import ByteRangeParameters
 from feature_extract.byte_range_response import ByteRangeResponse
 from feature_extract.common import handlers, result_dir_path, result_layer_name
-from feature_extract.datasets.dataset_parameters import DatasetParameters
+from feature_extract.datasets.dataset_parameters import (
+    DatasetExportParameters,
+    DatasetParameters,
+)
 from feature_extract.exceptions.unsupported_dataset import UnsupportedDatasetException
 from feature_extract.extract_parameters import ExtractParameters
 
@@ -39,7 +42,7 @@ def get_features_file_path(
             result_layer_name, geom_type=handlers[parameters.dataset].feature_type
         )
         provider.export_data(
-            DatasetParameters(
+            DatasetExportParameters(
                 lon_min=parameters.lon_min,
                 lon_max=parameters.lon_max,
                 lat_min=parameters.lat_min,
@@ -55,20 +58,14 @@ def count_features(
     parameters: ExtractParameters,
 ) -> int:
     _validate_dataset(parameters.dataset)
-    result_driver = ogr.GetDriverByName("Memory")
-    result_datasource = result_driver.CreateDataSource("")
-    result_layer = result_datasource.CreateLayer(result_layer_name, geom_type=handlers[parameters.dataset].feature_type)
-    handlers[parameters.dataset].dataset_provider.export_data(
+    return handlers[parameters.dataset].dataset_provider.count_features(
         DatasetParameters(
             lon_min=parameters.lon_min,
             lon_max=parameters.lon_max,
             lat_min=parameters.lat_min,
             lat_max=parameters.lat_max,
-            result_layer=result_layer,
         )
     )
-
-    return result_layer.GetFeatureCount()
 
 
 def get_bytes(

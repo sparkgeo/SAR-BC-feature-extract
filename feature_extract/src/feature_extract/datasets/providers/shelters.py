@@ -1,6 +1,10 @@
 from osgeo import ogr
 
-from feature_extract.common import get_features_from_layer, register_handler
+from feature_extract.common import (
+    count_features_in_layer,
+    get_features_from_layer,
+    register_handler,
+)
 from feature_extract.datasets.dataset_parameters import DatasetParameters
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
@@ -12,6 +16,7 @@ class Shelters(DatasetProvider):
         self.dataset_name = "Shelters"
         self.layer_name = "shelters"
         self.fgb_path = f"{settings.data_access_prefix}/{self.layer_name}.fgb"
+        self.driver = ogr.GetDriverByName("FlatGeobuf")
 
     def export_data(self, parameters: DatasetParameters) -> None:
         src_driver = ogr.GetDriverByName("FlatGeobuf")
@@ -25,6 +30,17 @@ class Shelters(DatasetProvider):
             src_layer,
             parameters.result_layer,
             title_provider,
+            parameters.lon_min,
+            parameters.lat_min,
+            parameters.lon_max,
+            parameters.lat_max,
+        )
+
+    def count_features(self, parameters: DatasetParameters) -> int:
+        src_datasource = self.driver.Open(self.fgb_path)
+        src_layer = src_datasource.GetLayerByIndex(0)
+        return count_features_in_layer(
+            src_layer,
             parameters.lon_min,
             parameters.lat_min,
             parameters.lon_max,

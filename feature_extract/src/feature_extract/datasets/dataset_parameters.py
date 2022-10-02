@@ -8,6 +8,9 @@ class DatasetParameters(BaseModel):
     lat_max: float
     lon_min: float
     lon_max: float
+
+
+class DatasetExportParameters(DatasetParameters):
     result_layer: ogr.Layer
 
     class Config:
