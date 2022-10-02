@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from os import environ, path
+from os import environ
 from re import escape, sub
 
 from boto3 import session
@@ -47,14 +47,6 @@ class DatasetProvider(ABC):
 
     def _get_file_name(self) -> str:
         return sub(rf"^{escape(self.data_access_prefix)}/", "", self.get_file_path())
-
-    def cache_key(self) -> str:
-        if self.s3_data_source:
-            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=self._get_file_name())
-            file_last_modified = response["LastModified"]
-            return sub(r"[^\d]", "", str(file_last_modified))
-        else:
-            return str(path.getmtime(self.get_file_path()))
 
     def get_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
         if self.s3_data_source:
