@@ -52,8 +52,8 @@ export class EcsalbStack extends cdk.Stack {
 
     const fargate = new ApplicationLoadBalancedFargateService(this, "ALBFargateSvc", {
       cluster: cluster,
-      cpu: 2048,
-      memoryLimitMiB: 4096,
+      cpu: 1024,
+      memoryLimitMiB: 2048,
       assignPublicIp: true,
       desiredCount: 1,
       idleTimeout: Duration.minutes(5),
@@ -82,9 +82,9 @@ export class EcsalbStack extends cdk.Stack {
 
     fargate.service.autoScaleTaskCount({
       minCapacity: 1,
-      maxCapacity: 4,
+      maxCapacity: 2,
     }).scaleOnCpuUtilization("apiCpuScaler", {
-      targetUtilizationPercent: 50
+      targetUtilizationPercent: 75
     })
   }
 }
