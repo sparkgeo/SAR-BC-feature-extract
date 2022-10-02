@@ -14,6 +14,7 @@ from feature_extract.extract_parameters import ExtractParameters
 
 
 def _get_name_for_export(prefix: str, cache_key: str, x_min: float, y_min: float, x_max: float, y_max: float) -> str:
+    print(f"** cache_key for filename: {cache_key}")
     return f"{prefix}-{cache_key}-{md5(dumps([x_min, y_min, x_max, y_max]).encode('UTF-8')).hexdigest()}"
 
 
@@ -33,7 +34,9 @@ def get_features_file_path(
     )
     result_filename = f"{result_filename_prefix}.json"
     result_path = path.join(result_dir_path, result_filename)
+    print(f"** derived path {result_path} for request")
     if not path.exists(result_path):
+        print("** no cache result")
         result_datasource = result_driver.CreateDataSource(result_path)
         result_layer = result_datasource.CreateLayer(
             result_layer_name, geom_type=handlers[parameters.dataset].feature_type
@@ -47,6 +50,8 @@ def get_features_file_path(
                 result_layer=result_layer,
             )
         )
+    else:
+        print("** cache result")
 
     return result_path
 
