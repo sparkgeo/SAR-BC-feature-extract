@@ -1,5 +1,15 @@
 import * as cdk from 'aws-cdk-lib';
-import { RemovalPolicy, aws_s3 as s3, aws_iam as iam, aws_ec2 as ec2, Duration } from 'aws-cdk-lib';
+import {
+  RemovalPolicy,
+  aws_s3 as s3,
+  aws_iam as iam,
+  aws_ec2 as ec2,
+  Duration,
+  aws_s3_deployment as s3_deploy,
+  aws_ssm as ssm,
+  FileSystem,
+  DockerImage
+} from 'aws-cdk-lib';
 import { SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, LogDriver } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
@@ -28,7 +38,7 @@ export class EcsalbStack extends cdk.Stack {
     });
 
     const fgbData = new s3.Bucket(this, "fgbData", {
-      bucketName: "fgb-data",
+      bucketName: "sar-fgb-data",
       removalPolicy: RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     })
@@ -85,6 +95,50 @@ export class EcsalbStack extends cdk.Stack {
       maxCapacity: 2,
     }).scaleOnCpuUtilization("apiCpuScaler", {
       targetUtilizationPercent: 75
+    })
+
+    // const albDns = new ssm.StringParameter(this, 'albDns', {
+    //   stringValue: fargate.loadBalancer.loadBalancerDnsName,
+    // });
+
+    const uiBucket = new s3.Bucket(this, "uiData", {
+      bucketName: "sar-ui",
+      publicReadAccess: true,
+      websiteIndexDocument: "index.html",
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true
+    })
+
+    const buildCommand = "npx vite build && mv ./dist/* /asset-output/"
+    const buildEnvironment = {
+      VITE_CONTACT_NAME: process.env.VITE_CONTACT_NAME as string,
+      VITE_SAR_ORG_NAME: process.env.VITE_SAR_ORG_NAME as string,
+      VITE_MAPBOX_GL_MAP: process.env.VITE_MAPBOX_GL_MAP as string,
+      // awaiting better solution
+      VITE_API_BASE: "http://ecsal-albfa-sxthry0orzlw-321779260.us-west-2.elb.amazonaws.com/",
+      VITE_MAP_INIT_CENTER: process.env.VITE_MAP_INIT_CENTER as string,
+      VITE_MAP_INIT_ZOOM: process.env.VITE_MAP_INIT_ZOOM as string
+    }
+    new s3_deploy.BucketDeployment(this, "uiDeployment", {
+      sources: [
+        s3_deploy.Source.asset(path.join(__dirname, "..", "..", "..", "ui"), {
+          assetHash: FileSystem.fingerprint(path.join(__dirname, "..", "..", "..", "ui"), {
+            exclude: [
+              "node_modules"
+            ],
+            extraHash: `${buildCommand}:${JSON.stringify(buildEnvironment)}`
+          }),
+          bundling: {
+            image: DockerImage.fromBuild(path.join(__dirname, "..", "..", ".."), {
+              file: path.join("ui", "Dockerfile")
+            }),
+            command: ["/bin/sh", "-c", buildCommand],
+            environment: buildEnvironment,
+            workingDirectory: "/asset-input"
+          }
+        })
+      ],
+      destinationBucket: uiBucket,
     })
   }
 }

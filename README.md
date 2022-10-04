@@ -21,10 +21,10 @@ If no local debugging is required, and all development work is exercised exclusi
 - `scripts/test.sh` to execute tests
 
 ### Debugging
-If local debugging is required, GDAL must also be installed (tested with GDAL 3.5.1)
-- `scripts/local.sh` to install dependencies and configure pre-commit hooks
+If local debugging is required, GDAL must also be installed (tested with GDAL 3.5.1).
+- `scripts/local.sh` to install dependencies and configure pre-commit hooks (assumes GDAL is available)
 
-#### Sample .vscode/launch.json
+#### Sample .vscode/launch.json for Local Debugging
 ```json
 {
     "version": "0.2.0",
