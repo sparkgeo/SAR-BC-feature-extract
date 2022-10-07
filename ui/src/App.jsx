@@ -9,11 +9,6 @@ import PanelExtraction from "./PanelExtraction";
 export function App() {
   const { authenticated } = useContext(AuthContext);
 
-  const [layersVisible, setLayersVisible] = useState({
-    roads: true,
-    trails: true,
-    shelters: true,
-  });
   const [mapBounds, setMapBounds] = useState(null);
 
   return (
@@ -22,18 +17,11 @@ export function App() {
       <ContactBadge />
 
       <main className="h-screen">
-        <MapInterface
-          layersVisible={layersVisible}
-          setMapBounds={setMapBounds}
-        />
+        <MapInterface setMapBounds={setMapBounds} />
       </main>
 
       {authenticated ? (
-        <PanelExtraction
-          mapBounds={mapBounds}
-          layersVisible={layersVisible}
-          setLayersVisible={setLayersVisible}
-        />
+        <PanelExtraction mapBounds={mapBounds} />
       ) : (
         <ModalAuthentication />
       )}

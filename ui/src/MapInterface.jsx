@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState, useContext } from "preact/hooks";
+import { LayersContext } from "./LayersContext";
 
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -8,18 +9,25 @@ import { geojson } from "flatgeobuf";
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_GL_MAP;
 const baseApi = import.meta.env.VITE_API_BASE;
 
-// const roadSegments =
-//   "https://brian-search-rescue-test-bucket.s3.amazonaws.com/line-road-segments.fgb";
-// const shelterPoints =
-//   "https://brian-search-rescue-test-bucket.s3.amazonaws.com/point-shelters.fgb";
-// const trailSegments =
-//   "https://brian-search-rescue-test-bucket.s3.amazonaws.com/point-trails.fgb";
-
-const roadSegments = `${baseApi}/Resource Roads/fgb`;
-
-const shelterPoints = `${baseApi}/Shelters/fgb`;
-
-const trailSegments = `${baseApi}/Trails/fgb`;
+// List of htmlSafeColors
+const colors = [
+  "blue",
+  "navy",
+  "red",
+  "fuchsia",
+  "green",
+  "aqua",
+  "yellow",
+  "gray",
+  "lime",
+  "maroon",
+  "olive",
+  "purple",
+  "silver",
+  "teal",
+  "white",
+];
+let layersCount = 0;
 
 const generateEmptyFeatureClass = () => ({
   type: "FeatureCollection",
@@ -27,13 +35,16 @@ const generateEmptyFeatureClass = () => ({
 });
 
 /** It's the map. Standard mapbox/maplibre setup with a possible addition of stuff? */
-function MapInterface({ setMapBounds, layersVisible }) {
+function MapInterface({ setMapBounds }) {
+  const { layersStatus } = useContext(LayersContext);
   const mapRef = useRef(null);
   const [layersLoading, setLayersLoading] = useState(false);
 
   useEffect(() => {
     const center = import.meta.env.VITE_MAP_INIT_CENTER.split(",") ?? [0, 0];
     const zoom = import.meta.env.VITE_MAP_INIT_ZOOM ?? 4;
+
+    const layers = Object.values(layersStatus);
 
     mapRef.current = new mapboxgl.Map({
       container: mapRef.current,
@@ -58,125 +69,89 @@ function MapInterface({ setMapBounds, layersVisible }) {
       };
       setMapBounds(map.getBounds().toArray());
 
-      // Load road segments
+      const dataLoadingFunctions = [];
 
-      async function loadRoadSegments() {
-        let i = 0;
-        const fc = generateEmptyFeatureClass();
-        const iterable = geojson.deserialize(
-          roadSegments,
-          mapBounds
-          // handleHeaderMeta
+      for (const layer of layers) {
+        const { name } = layer;
+        const apiEndpoint = `${baseApi}/${name}/fgb`;
+        const noSpaceName = name.split(" ").join("-");
+
+        dataLoadingFunctions.push(
+          (async function () {
+            console.log("Function triggerd");
+
+            let i = 0;
+            const fc = generateEmptyFeatureClass();
+            const iterable = geojson.deserialize(apiEndpoint, mapBounds);
+            for await (let feature of iterable) {
+              fc.features.push({ ...feature, id: i });
+              i += 1;
+            }
+            map.getSource(noSpaceName).setData(fc);
+            return fc;
+          })()
         );
-        for await (let feature of iterable) {
-          fc.features.push({ ...feature, id: i });
-          i += 1;
-        }
-        map.getSource("roads").setData(fc);
-        return fc;
       }
 
-      async function loadTrailSegments() {
-        let i = 0;
-        const fc = generateEmptyFeatureClass();
-        const iterable = geojson.deserialize(
-          trailSegments,
-          mapBounds
-          // handleHeaderMeta
-        );
-        for await (let feature of iterable) {
-          fc.features.push({ ...feature, id: i });
-          i += 1;
-        }
-        map.getSource("trails").setData(fc);
-        return fc;
-      }
-
-      async function loadShelterPoints() {
-        let i = 0;
-
-        const fc = generateEmptyFeatureClass();
-        const iterable = geojson.deserialize(
-          shelterPoints,
-          mapBounds
-          // handleHeaderMeta
-        );
-        for await (let feature of iterable) {
-          fc.features.push({ ...feature, id: i });
-          i += 1;
-        }
-        map.getSource("shelters").setData(fc);
-
-        return fc;
-      }
-
-      Promise.allSettled([
-        loadRoadSegments(),
-        loadShelterPoints(),
-        loadTrailSegments(),
-      ]).then(() => {
+      Promise.allSettled(dataLoadingFunctions).then(() => {
         setLayersLoading(false);
       });
     }
 
     // Trigger loading data on initial load as well as on move of features
     map.on("load", () => {
-      map.addSource("trails", {
-        type: "geojson",
-        data: generateEmptyFeatureClass(),
-      });
-      map.addLayer({
-        id: "trails",
-        type: "line",
-        source: "trails",
-        layout: {
-          visibility: "visible",
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "red",
-          "line-width": 2,
-        },
-      });
+      const layers = Object.values(layersStatus);
 
-      map.addSource("roads", {
-        type: "geojson",
-        data: generateEmptyFeatureClass(),
-      });
-      map.addLayer({
-        id: "roads",
-        type: "line",
-        source: "roads",
-        layout: {
-          visibility: "visible",
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "yellow",
-          "line-width": 2,
-        },
-      });
+      for (const layer of layers) {
+        const { name, type, enabled } = layer;
+        const noSpaceName = name.split(" ").join("-");
 
-      map.addSource("shelters", {
-        type: "geojson",
-        data: generateEmptyFeatureClass(),
-      });
-      map.addLayer({
-        id: "shelters",
-        type: "circle",
-        source: "shelters",
-        paint: {
-          // Make circles larger as the user zooms from z12 to z22.
-          "circle-radius": 5,
-          // Color circles by shelter, using a `match` expression.
-          "circle-color": "blue",
-        },
-        layout: {
-          visibility: "visible",
-        },
-      });
+        if (type === "point") {
+          map.addSource(noSpaceName, {
+            type: "geojson",
+            data: generateEmptyFeatureClass(),
+          });
+          map.addLayer({
+            id: noSpaceName,
+            type: "circle",
+            source: noSpaceName,
+            paint: {
+              // Make circles larger as the user zooms from z12 to z22.
+              "circle-radius": 5,
+              // Color circles by shelter, using a `match` expression.
+              "circle-color": colors[layersCount],
+            },
+            layout: {
+              visibility: "none",
+            },
+          });
+          layersCount++;
+        } else if (type === "line") {
+          map.addSource(noSpaceName, {
+            type: "geojson",
+            data: generateEmptyFeatureClass(),
+          });
+          map.addLayer({
+            id: noSpaceName,
+            type: "line",
+            source: noSpaceName,
+            layout: {
+              visibility: "none",
+              "line-join": "round",
+              "line-cap": "round",
+            },
+            paint: {
+              "line-color": colors[layersCount],
+              "line-width": 2,
+            },
+          });
+          layersCount++;
+        } else if (type === "polygon") {
+          throw new Error("Polygon data type not supported");
+        } else {
+          throw new Error(`Unknwon data type "${type}"`);
+        }
+      }
 
       loadData();
     });
@@ -190,13 +165,14 @@ function MapInterface({ setMapBounds, layersVisible }) {
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current;
-    Object.entries(layersVisible).forEach(([layer, value]) => {
+    Object.values(layersStatus).forEach(({ name, enabled }) => {
+      const noSpaceName = name.split(" ").join("-");
       map
-        .getLayer(layer)
-        ?.setLayoutProperty("visibility", value ? "visible" : "none");
+        .getLayer(noSpaceName)
+        ?.setLayoutProperty("visibility", enabled ? "visible" : "none");
       map.triggerRepaint();
     });
-  }, [mapRef, layersVisible]);
+  }, [mapRef, layersStatus]);
 
   return (
     <>
