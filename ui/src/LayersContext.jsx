@@ -10,6 +10,13 @@ export const LayersContext = createContext({
 export const LayersContextProvider = ({ children }) => {
   const [layersStatus, setLayersStatus] = useState({});
 
+  /**
+   * Updates the status of a single layer
+   *
+   * @param {String} key the layer name
+   * @param {Boolean} enabled the status of the layer
+   *
+   */
   const updateLayersStatus = ({ key, enabled }) => {
     const updatedStatus = { ...layersStatus };
     updatedStatus[key] = { ...updatedStatus[key], enabled };

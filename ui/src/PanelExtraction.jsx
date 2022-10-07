@@ -1,15 +1,19 @@
-import { useState } from "preact/hooks";
+import { useState, useContext, useEffect } from "preact/hooks";
 import { saveAs } from "file-saver";
 import { useApi } from "./hooks/useApi";
 import ButtonLoading from "./ButtonLoading";
+import CheckboxMapLayer from "./CheckboxMapLayer";
+import { LayersContext } from "./LayersContext";
 
-function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
-  const [errors, setErrors] = useState({
-    trails: false,
-    roads: false,
-    shelters: false,
-  });
+function PanelExtraction({ mapBounds }) {
   const { api, loading } = useApi();
+  const { layersStatus, updateLayersStatus } = useContext(LayersContext);
+  const [errors, setErrors] = useState(
+    Object.keys(layersStatus).reduce(
+      (accumulator, name) => ({ ...accumulator, [name]: null }),
+      {}
+    )
+  );
 
   const NumberIndicator = ({ children }) => (
     <div className="bg-emerald-600 text-white text-xl rounded-full p-2 w-10 h-10 flex justify-center items-center">
@@ -17,62 +21,41 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
     </div>
   );
 
-  const handleLayerSelect = (layer) => () => {
-    setLayersVisible({ ...layersVisible, [layer]: !layersVisible[layer] });
-  };
+  const handleLayerSelect =
+    ({ key, value }) =>
+    () => {
+      updateLayersStatus({ key, enabled: value });
+    };
 
   async function downloading() {
-    const { roads, trails, shelters } = layersVisible;
     const [[xMin, yMax], [xMax, yMin]] = mapBounds;
 
-    if (shelters) {
-      try {
-        const data = await api(
-          `/Shelters/export/${xMin}/${yMin}/${xMax}/${yMax}`
-        );
+    for (const layer of Object.values(layersStatus)) {
+      if (layer.enabled) {
+        try {
+          const name = layer.name.split(" ").join("-");
+          const data = await api(
+            `/${name}/export/${xMin}/${yMin}/${xMax}/${yMax}`
+          );
 
-        var blob = new Blob([JSON.stringify(data)], {
-          type: "text/plain;charset=utf-8",
-        });
-        saveAs(blob, "extracted-shelters.json");
-      } catch (e) {
-        setErrors({ ...errors, shelters: true });
-      }
-    }
-    if (trails) {
-      try {
-        const data = await api(
-          `/Trails/export/${xMin}/${yMin}/${xMax}/${yMax}`
-        );
-
-        var blob = new Blob([JSON.stringify(data)], {
-          type: "text/plain;charset=utf-8",
-        });
-        saveAs(blob, "extracted-trails.json");
-      } catch (e) {
-        setErrors({ ...errors, trails: true });
-      }
-    }
-    if (roads) {
-      try {
-        const data = await api(
-          `/Resource Roads/export/${xMin}/${yMin}/${xMax}/${yMax}`
-        );
-        var blob = new Blob([JSON.stringify(data)], {
-          type: "text/plain;charset=utf-8",
-        });
-        saveAs(blob, "extracted-resource-roads.json");
-      } catch (e) {
-        setErrors({ ...errors, roads: true });
+          var blob = new Blob([JSON.stringify(data)], {
+            type: "text/plain;charset=utf-8",
+          });
+          saveAs(blob, `${name}.geojson`);
+        } catch (e) {
+          setErrors({ ...errors, [layer.name]: true });
+        }
       }
     }
   }
 
-  const disabled = !(
-    layersVisible.shelters ||
-    layersVisible.roads ||
-    layersVisible.trails
-  );
+  let downloadsDisabled = false;
+  for (let layer of Object.values(layersStatus)) {
+    if (!layer.enabled) {
+      downloadsDisabled = true;
+      break;
+    }
+  }
 
   return (
     <section className="rounded-lg fixed z-20 right-10 bottom-20 px-4 pb-6 bg-white shadow-xl">
@@ -88,45 +71,21 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
           <div className="flex flex-row items-center my-2">
             <NumberIndicator>2</NumberIndicator>
             <span className="ml-4 text-xl">Select Datasets</span>
-          </div>{" "}
-          <div className="ml-12 select-none grid grid-cols-3 gap-x-2">
-            <div className="flex flex-row">
-              <input
-                type="checkbox"
-                name=""
-                id="layer1"
-                className="mr-2"
-                checked={layersVisible.shelters}
-                onChange={handleLayerSelect("shelters")}
+          </div>
+          <div className="ml-12 select-none grid grid-cols-1 gap-y-1">
+            {Object.entries(layersStatus).map(([label, { enabled }]) => (
+              <CheckboxMapLayer
+                label={label}
+                checked={enabled}
+                handleSelect={handleLayerSelect({
+                  key: label,
+                  value: !enabled,
+                })}
               />
-              <label htmlFor="layer1">shelters</label>
-            </div>
-            <div className="flex flex-row">
-              <input
-                type="checkbox"
-                name=""
-                id="layer2"
-                className="mr-2"
-                checked={layersVisible.roads}
-                onChange={handleLayerSelect("roads")}
-              />
-              <label htmlFor="layer2">roads</label>
-            </div>
-            <div className="flex flex-row">
-              <input
-                type="checkbox"
-                name=""
-                id="layer3"
-                className="mr-2"
-                checked={layersVisible.trails}
-                onChange={handleLayerSelect("trails")}
-              />
-              <label htmlFor="layer3">trails</label>
-            </div>
+            ))}
           </div>
         </li>
         <li className="my-2 py-2 border-t border-t-gray-400">
-          {" "}
           <div className="flex flex-row items-center my-2">
             <NumberIndicator>3</NumberIndicator>
             <span className="ml-4 text-xl">Download the data</span>
@@ -137,9 +96,9 @@ function PanelExtraction({ layersVisible, setLayersVisible, mapBounds }) {
             ) : (
               <button
                 onClick={downloading}
-                disabled={disabled}
+                disabled={downloadsDisabled}
                 className={`capitalize bg-emerald-${
-                  disabled ? "300 cursor-not-allowed" : "500"
+                  downloadsDisabled ? "300 cursor-not-allowed" : "500"
                 } text-white p-4`}
               >
                 download
