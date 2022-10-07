@@ -10,7 +10,7 @@ function ModalAuthentication() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { setAuthenticated, setAuthParams } = useContext(AuthContext);
-  const { initalizeLayers } = useContext(LayersContext);
+  const { initializeLayers } = useContext(LayersContext);
 
   async function authenticate({ user, pass, modalBypass = false }) {
     setLoading(true);
@@ -24,18 +24,22 @@ function ModalAuthentication() {
         setLoading(false);
       } else if (response.status === 200) {
         const data = await response.json();
-        initalizeLayers(data);
+        initializeLayers(data);
 
         setAuthParams({ user, pass });
         localStorage.setItem("auth", JSON.stringify({ user, pass }));
         setAuthenticated(true);
       } else {
+        console.log("response ", response.status);
+
         setError("server");
         setLoading(false);
       }
       if (modalBypass) setAppLoading(false);
     } catch (e) {
-      setError("server");
+      console.error(e);
+
+      setError("client");
       setLoading(false);
       setAppLoading(false);
     }
