@@ -1,5 +1,7 @@
 import { useState, useContext, useEffect } from "preact/hooks";
 import { AuthContext } from "./AuthContext";
+import { LayersContext } from "./LayersContext";
+
 import base64 from "base-64";
 import ButtonLoading from "./ButtonLoading";
 
@@ -8,6 +10,7 @@ function ModalAuthentication() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { setAuthenticated, setAuthParams } = useContext(AuthContext);
+  const { initalizeLayers } = useContext(LayersContext);
 
   async function authenticate({ user, pass, modalBypass = false }) {
     setLoading(true);
@@ -20,7 +23,9 @@ function ModalAuthentication() {
         setError("auth");
         setLoading(false);
       } else if (response.status === 200) {
-        // const data = await response.json();
+        const data = await response.json();
+        initalizeLayers(data);
+
         setAuthParams({ user, pass });
         localStorage.setItem("auth", JSON.stringify({ user, pass }));
         setAuthenticated(true);
