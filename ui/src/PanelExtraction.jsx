@@ -73,7 +73,7 @@ function PanelExtraction({ mapBounds }) {
             <span className="ml-4 text-xl">Select Datasets</span>
           </div>
           <div className="ml-12 select-none grid grid-cols-1 gap-y-1">
-            {Object.entries(layersStatus).map(([label, { enabled }]) => (
+            {Object.values(layersStatus).map(({ name: label, enabled }) => (
               <CheckboxMapLayer
                 label={label}
                 checked={enabled}

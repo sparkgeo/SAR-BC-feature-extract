@@ -4,12 +4,12 @@ function CheckboxMapLayer({ label, checked, handleSelect }) {
       <input
         type="checkbox"
         name=""
-        id="layer1"
+        id={`layer-${label.split(" ").join("-")}`}
         className="mr-2"
         checked={checked}
         onChange={handleSelect}
       />
-      <label htmlFor="layer1">{label}</label>
+      <label htmlFor={`layer-${label.split(" ").join("-")}`}>{label}</label>
     </div>
   );
 }
