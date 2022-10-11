@@ -35,7 +35,6 @@ function FlatgeobufLayer(props) {
 
     updateBounds();
     map.on("moveend", () => {
-      console.log("detect map move");
       updateBounds();
     });
     return () => {

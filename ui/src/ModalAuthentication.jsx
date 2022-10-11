@@ -30,8 +30,6 @@ function ModalAuthentication() {
         localStorage.setItem("auth", JSON.stringify({ user, pass }));
         setAuthenticated(true);
       } else {
-        console.log("response ", response.status);
-
         setError("server");
         setLoading(false);
       }
