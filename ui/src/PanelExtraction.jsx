@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "preact/hooks";
+import { useState, useContext, useEffect } from "react";
 import { saveAs } from "file-saver";
 import { useApi } from "./hooks/useApi";
 import ButtonLoading from "./ButtonLoading";
@@ -81,6 +81,7 @@ function PanelExtraction({ mapBounds }) {
                   key: label,
                   value: !enabled,
                 })}
+                key={label}
               />
             ))}
           </div>

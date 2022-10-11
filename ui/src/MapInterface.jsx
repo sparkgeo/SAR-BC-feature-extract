@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState, useContext } from "preact/hooks";
+import { useEffect, useRef, useState, useContext } from "react";
 import { LayersContext } from "./LayersContext";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { geojson } from "flatgeobuf";
 import Map, { Source, Layer } from "react-map-gl";
+
+import FlatgeobufLayer from "./FlatgeobufLayer";
 
 const mapToken = import.meta.env.VITE_MAPBOX_GL_MAP;
 const baseApi = import.meta.env.VITE_API_BASE;
@@ -148,26 +150,6 @@ function MapInterface({ setMapBounds }) {
   // const initialLoad = !(mapboxInitialized || initialLayersLoaded);
   // const initialLoad = true;
 
-  // useEffect(() => {
-  //   function initializeMap() {
-  //     // Trigger loading data on initial load as well as on move of features
-  //     map.on("load", () => {
-  //       setMapboxInitialized(true);
-  //     });
-  //     map.on("moveend", () =>
-  //       loadData({
-  //         map,
-  //         layersStatus,
-  //         setLayersLoading,
-  //         setMapBounds,
-  //         setInitialLoad: setInitialLayersLoaded,
-  //       })
-  //     );
-  //   }
-
-  //   if (!mapboxInitialized) initializeMap();
-  // }, [layersStatus]);
-
   // // Handle layer initalization
   // useEffect(() => {
   //   console.log("Initial layers loaded ", initialLayersLoaded);
@@ -217,8 +199,6 @@ function MapInterface({ setMapBounds }) {
   //   });
   // }, [mapRef, layersStatus, initialLoad]);
 
-  console.log("Map tooen ", mapToken);
-
   return (
     <>
       <section className="h-full w-full">
@@ -227,7 +207,14 @@ function MapInterface({ setMapBounds }) {
           initialViewState={{ longitude: center[0], latitude: center[1], zoom }}
           mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
         >
-          {mapLayers}
+          {Object.values(layersStatus).map(({ name, type, enabled }) => (
+            <FlatgeobufLayer
+              name={name}
+              type={type}
+              enabled={enabled}
+              key={name}
+            />
+          ))}
         </Map>
       </section>
       {/* <div
