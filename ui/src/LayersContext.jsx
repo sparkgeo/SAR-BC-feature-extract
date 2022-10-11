@@ -8,6 +8,7 @@ export const LayersContext = createContext({
 
 export const LayersContextProvider = ({ children }) => {
   const [layersStatus, setLayersStatus] = useState({});
+  const [mapBounds, setMapBounds] = useState(null);
 
   /**
    * Updates the status of a single layer
@@ -32,7 +33,13 @@ export const LayersContextProvider = ({ children }) => {
 
   return (
     <LayersContext.Provider
-      value={{ layersStatus, updateLayersStatus, initializeLayers }}
+      value={{
+        layersStatus,
+        updateLayersStatus,
+        initializeLayers,
+        mapBounds,
+        setMapBounds,
+      }}
     >
       {children}
     </LayersContext.Provider>

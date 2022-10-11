@@ -1,13 +1,14 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { saveAs } from "file-saver";
 import { useApi } from "./hooks/useApi";
 import ButtonLoading from "./ButtonLoading";
 import CheckboxMapLayer from "./CheckboxMapLayer";
 import { LayersContext } from "./LayersContext";
 
-function PanelExtraction({ mapBounds }) {
+function PanelExtraction() {
   const { api, loading } = useApi();
-  const { layersStatus, updateLayersStatus } = useContext(LayersContext);
+  const { layersStatus, updateLayersStatus, mapBounds } =
+    useContext(LayersContext);
   const [errors, setErrors] = useState(
     Object.keys(layersStatus).reduce(
       (accumulator, name) => ({ ...accumulator, [name]: null }),

@@ -17,7 +17,7 @@ const colors = [
   "white",
 ];
 
-const lineLayer = (enabled, layersCount) => ({
+const lineLayer = (enabled, index) => ({
   type: "line",
   layout: {
     visibility: enabled ? "visible" : "none",
@@ -25,34 +25,34 @@ const lineLayer = (enabled, layersCount) => ({
     "line-cap": "round",
   },
   paint: {
-    "line-color": colors[layersCount],
+    "line-color": colors[index],
     "line-width": 2,
   },
 });
 
-const fillLayer = (enabled, layersCount) => {
+const fillLayer = (enabled, index) => {
   throw new Error("Fill layer not implemented");
 };
 
-const pointLayer = (enabled, layersCount) => ({
+const pointLayer = (enabled, index) => ({
   type: "circle",
   paint: {
     // Make circles larger as the user zooms from z12 to z22.
     "circle-radius": 5,
     // Color circles by shelter, using a `match` expression.
-    "circle-color": colors[layersCount],
+    "circle-color": colors[index],
   },
   layout: {
     visibility: enabled ? "visible" : "none",
   },
 });
 
-export const mapLayerStyle = ({ enabled, layersCount, type }) => {
+export const mapLayerStyle = ({ enabled, index, type }) => {
   const options = {
     point: pointLayer,
     line: lineLayer,
     fill: fillLayer,
   };
 
-  return options[type](enabled, layersCount);
+  return options[type](enabled, index);
 };
