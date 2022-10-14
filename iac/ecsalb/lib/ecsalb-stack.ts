@@ -27,6 +27,12 @@ export class EcsalbStack extends cdk.Stack {
       containerInsights: true
     });
 
+    new s3.Bucket(this, "publicTileData", {
+      bucketName: "public-tile-data",
+      removalPolicy: RemovalPolicy.DESTROY,
+      publicReadAccess: true
+    })
+
     const fgbData = new s3.Bucket(this, "fgbData", {
       bucketName: "fgb-data",
       removalPolicy: RemovalPolicy.DESTROY,
