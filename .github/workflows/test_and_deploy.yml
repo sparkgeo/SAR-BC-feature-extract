@@ -21,7 +21,7 @@ jobs:
       run: pre-commit install
 
     - name: pre-commit checks
-      run: pre-commit run --all-files
+      run: pre-commit run --all-files mypy
 
   test-api:
     needs: validation
