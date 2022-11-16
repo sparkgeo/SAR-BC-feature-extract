@@ -61,6 +61,15 @@ services:
       aws-cli:
         condition: service_completed_successfully
 
+  vector-tile-reader:
+    image: tomfumb/bvsar-feature-extract-vector-tile-api
+    build:
+      context: .
+      dockerfile: ./vector_tile_reader/Dockerfile
+    depends_on:
+      aws-cli:
+        condition: service_completed_successfully
+
   ui:
     image: tomfumb/bvsar-feature-extract-ui
     build:

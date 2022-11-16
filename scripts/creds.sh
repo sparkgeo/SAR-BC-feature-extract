@@ -1,5 +1,7 @@
 #!/bin/bash
 
+pushd $(dirname ${0})/..
+
 USER=""
 PASS=""
 while [[ "$#" > 0 ]]; do
