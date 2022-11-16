@@ -106,9 +106,7 @@ export class EcsalbStack extends cdk.Stack {
     const vectorTileObjectLambda = new lambda.Function(this, "vectorTileObjectLambda", {
       runtime: lambda.Runtime.PYTHON_3_8,
       handler: "handler.handler",
-      code: lambda.Code.fromDockerBuild(path.join(__dirname, "..", "..", ".."), {
-        file: path.join("vector_tile_reader", "Dockerfile")
-      })
+      code: lambda.Code.fromAsset(path.join(__dirname, "..", "..", "..", "vector_tile_reader"))
     })
     vectorTileObjectLambda.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
