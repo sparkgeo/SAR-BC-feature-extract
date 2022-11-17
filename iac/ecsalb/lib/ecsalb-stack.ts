@@ -58,7 +58,7 @@ export class EcsalbStack extends cdk.Stack {
 
     mbtData.addToResourcePolicy(new iam.PolicyStatement({
       actions: ["s3:GetObject"],
-      resources: [fgbData.arnForObjects("*")],
+      resources: [mbtData.arnForObjects("*")],
       conditions: {"StringEquals": {"aws:SourceVpce": [vpcEndpoint.vpcEndpointId]}},
       principals: [new iam.AnyPrincipal()]
     }))
