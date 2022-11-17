@@ -105,9 +105,10 @@ export class EcsalbStack extends cdk.Stack {
 
     const vectorTileObjectLambda = new lambda.Function(this, "vectorTileObjectLambda", {
       runtime: lambda.Runtime.PYTHON_3_8,
-      handler: "handler.handler",
+      handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "..", "..", "..", "vector_tile_reader"))
     })
+    vectorTileBucket.grantRead(vectorTileObjectLambda)
     vectorTileObjectLambda.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       resources: ["*"],

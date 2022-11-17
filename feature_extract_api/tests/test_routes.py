@@ -12,7 +12,7 @@ from pytest import MonkeyPatch
 from feature_extract.common import list_datasets
 from feature_extract.datasets.geometry_type import GeometryType
 from feature_extract.datasets.providers.resource_roads import ResourceRoads
-from feature_extract.extract_parameters import ExtractParameters
+from feature_extract.extract_request_parameters import ExtractRequestParameters
 
 username = str(uuid4())
 password = str(uuid4())
@@ -48,7 +48,7 @@ def test_count_features(
     assert response.status_code == 200
     assert response.json() == count
     count_features_mock.assert_called_once_with(
-        ExtractParameters(
+        ExtractRequestParameters(
             lon_min=x_min,
             lon_max=x_max,
             lat_min=y_min,
@@ -72,7 +72,7 @@ def test_export_features(
     assert response.status_code == 200
     assert response.json() == export_content
     get_features_file_path_mock.assert_called_once_with(
-        ExtractParameters(
+        ExtractRequestParameters(
             lon_min=x_min,
             lon_max=x_max,
             lat_min=y_min,

@@ -2,18 +2,21 @@ from hashlib import md5
 from json import dumps
 from os import path
 from re import IGNORECASE, sub
+from typing import Type
 
 from osgeo import ogr
 
-from feature_extract.byte_range_parameters import ByteRangeParameters
+from feature_extract.byte_range_request_parameters import ByteRangeRequestParameters
 from feature_extract.byte_range_response import ByteRangeResponse
 from feature_extract.common import handlers, result_dir_path, result_layer_name
+from feature_extract.dataset_request_parameters import DatasetRequestParameters
 from feature_extract.datasets.dataset_parameters import (
     DatasetExportParameters,
     DatasetParameters,
 )
 from feature_extract.exceptions.unsupported_dataset import UnsupportedDatasetException
-from feature_extract.extract_parameters import ExtractParameters
+from feature_extract.extract_request_parameters import ExtractRequestParameters
+from feature_extract.vector_tile_request_parameters import VectorTileRequestParameters
 
 
 def _get_name_for_export(prefix: str, x_min: float, y_min: float, x_max: float, y_max: float) -> str:
@@ -21,9 +24,9 @@ def _get_name_for_export(prefix: str, x_min: float, y_min: float, x_max: float, 
 
 
 def get_features_file_path(
-    parameters: ExtractParameters,
+    parameters: ExtractRequestParameters,
 ) -> str:
-    _validate_dataset(parameters.dataset)
+    _validate_dataset(parameters)
     provider = handlers[parameters.dataset].dataset_provider
     result_driver = ogr.GetDriverByName("GeoJSON")
     result_filename_prefix = _get_name_for_export(
@@ -50,9 +53,9 @@ def get_features_file_path(
 
 
 def count_features(
-    parameters: ExtractParameters,
+    parameters: ExtractRequestParameters,
 ) -> int:
-    _validate_dataset(parameters.dataset)
+    _validate_dataset(parameters)
     return handlers[parameters.dataset].dataset_provider.count_features(
         DatasetParameters(
             lon_min=parameters.lon_min,
@@ -63,16 +66,20 @@ def count_features(
     )
 
 
-def get_bytes(
-    parameters: ByteRangeParameters,
+def get_fgb_bytes(
+    parameters: ByteRangeRequestParameters,
 ) -> ByteRangeResponse:
-    _validate_dataset(parameters.dataset)
-    return handlers[parameters.dataset].dataset_provider.get_bytes(
+    _validate_dataset(parameters)
+    return handlers[parameters.dataset].dataset_provider.get_fgb_bytes(
         range_start=parameters.range_start,
         range_end=parameters.range_end,
     )
 
 
-def _validate_dataset(dataset: str) -> None:
-    if dataset not in handlers:
-        raise UnsupportedDatasetException(dataset)
+def get_vector_tile(parameters: VectorTileRequestParameters):
+    _validate_dataset(parameters)
+
+
+def _validate_dataset(parameters: Type[DatasetRequestParameters]) -> None:
+    if parameters.dataset not in handlers:
+        raise UnsupportedDatasetException(parameters.dataset)

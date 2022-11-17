@@ -57,7 +57,7 @@ class ResourceRoads(DatasetProvider):
     def get_layer_name(self) -> str:
         return self.layer_name
 
-    def get_file_path(self) -> str:
+    def get_fgb_file_path(self) -> str:
         return self.fgb_path
 
     def get_ogr_type(self) -> int:

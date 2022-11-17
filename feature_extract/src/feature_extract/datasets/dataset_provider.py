@@ -42,16 +42,16 @@ class DatasetProvider(ABC):
         pass
 
     @abstractmethod
-    def get_file_path(self) -> str:
+    def get_fgb_file_path(self) -> str:
         pass
 
-    def _get_file_name(self) -> str:
-        return sub(rf"^{escape(self.data_access_prefix)}/", "", self.get_file_path())
+    def _get_fgb_file_name(self) -> str:
+        return sub(rf"^{escape(self.data_access_prefix)}/", "", self.get_fgb_file_path())
 
-    def get_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
+    def get_fgb_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
         if self.s3_data_source:
             range_response = self.s3_client.get_object(
-                Bucket=self.bucket_name, Key=self._get_file_name(), Range=f"bytes={range_start}-{range_end}"
+                Bucket=self.bucket_name, Key=self._get_fgb_file_name(), Range=f"bytes={range_start}-{range_end}"
             )
             return ByteRangeResponse(
                 content_range=range_response["ContentRange"],
