@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from os import environ
 from re import escape, sub
 
 from boto3 import session
@@ -9,21 +8,21 @@ from feature_extract.datasets.dataset_parameters import (
     DatasetExportParameters,
     DatasetParameters,
 )
+from feature_extract.settings import settings
 
 
 class DatasetProvider(ABC):
     def __init__(self):
-        self.data_access_prefix = environ["data_access_prefix"]
-        self.s3_data_source = self.data_access_prefix.startswith("/vsis3/")
+        self.s3_data_source = settings.data_access_prefix.startswith("/vsis3/")
         if self.s3_data_source:
             s3_config = {"service_name": "s3"}
-            if "AWS_S3_ENDPOINT" in environ:
-                use_https = environ.get("AWS_HTTPS", "YES") != "NO"
+            if settings.AWS_S3_ENDPOINT:
+                use_https = settings.AWS_HTTPS != "NO"
                 s3_scheme = "https" if use_https else "http"
                 s3_config["use_ssl"] = use_https
-                s3_config["endpoint_url"] = "{}://{}".format(s3_scheme, environ["AWS_S3_ENDPOINT"])
+                s3_config["endpoint_url"] = "{}://{}".format(s3_scheme, settings.AWS_S3_ENDPOINT)
             self.s3_client = session.Session().client(**s3_config)
-            self.bucket_name = "/".join(self.data_access_prefix.split("/")[2:])
+            self.bucket_name = "/".join(settings.data_access_prefix.split("/")[2:])
 
     @abstractmethod
     def export_data(self, parameters: DatasetExportParameters) -> None:
@@ -46,7 +45,7 @@ class DatasetProvider(ABC):
         pass
 
     def _get_fgb_file_name(self) -> str:
-        return sub(rf"^{escape(self.data_access_prefix)}/", "", self.get_fgb_file_path())
+        return sub(rf"^{escape(settings.data_access_prefix)}/", "", self.get_fgb_file_path())
 
     def get_fgb_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
         if self.s3_data_source:
