@@ -1,7 +1,9 @@
+import logging
 from glob import glob
 from importlib import import_module
-from os import path
+from os import environ, path
 from re import sub
+from sys import stdout
 
 from osgeo.ogr import UseExceptions
 
@@ -22,5 +24,21 @@ for file_path in [
         module = import_module(module_str)
     except ImportError as e:
         raise Exception(f"unable to import module '{module_str}': {e}")
+
+requestedLogLevel = environ.get("LOG_LEVEL", "info")
+logLevelMapping = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warn": logging.WARN,
+    "error": logging.ERROR,
+}
+handlers = [
+    logging.StreamHandler(stream=stdout),
+]
+logging.basicConfig(
+    handlers=handlers,
+    level=logLevelMapping.get(requestedLogLevel, logging.INFO),
+    format="%(levelname)s %(asctime)s %(message)s",
+)
 
 UseExceptions()

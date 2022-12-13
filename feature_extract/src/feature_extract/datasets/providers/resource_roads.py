@@ -18,7 +18,7 @@ class ResourceRoads(DatasetProvider):
         super().__init__()
         self.dataset_name = "Resource Roads"
         self.layer_name = "WHSE_FOREST_TENURE_FTEN_ROAD_SECTION_LINES_SVW"
-        self.fgb_path = f"{settings.data_access_prefix}/{self.layer_name}.fgb"
+        self.fgb_path = f"{settings.fgb_access_prefix}/{self.layer_name}.fgb"
         self.driver = ogr.GetDriverByName("FlatGeobuf")
 
     def export_data(self, parameters: DatasetExportParameters) -> None:

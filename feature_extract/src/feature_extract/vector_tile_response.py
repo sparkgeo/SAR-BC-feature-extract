@@ -3,7 +3,5 @@ from typing import Iterator
 
 
 @dataclass
-class ByteRangeResponse:
-    content_range: str
-    content_type: str
+class VectorTileResponse:
     byte_iterator: Iterator[bytes]

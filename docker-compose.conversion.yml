@@ -7,7 +7,8 @@ services:
       context: .
     environment:
       creds_hash: ""
-      data_access_prefix: ""
+      fgb_access_prefix: ""
+      mbt_bucket_name: ""
     volumes:
       - source: /tmp
         target: /output

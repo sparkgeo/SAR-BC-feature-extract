@@ -15,7 +15,7 @@ class Trails(DatasetProvider):
         super().__init__()
         self.dataset_name = "Trails"
         self.layer_name = "trails"
-        self.fgb_path = f"{settings.data_access_prefix}/{self.layer_name}.fgb"
+        self.fgb_path = f"{settings.fgb_access_prefix}/{self.layer_name}.fgb"
         self.driver = ogr.GetDriverByName("FlatGeobuf")
 
     def export_data(self, parameters: DatasetParameters) -> None:

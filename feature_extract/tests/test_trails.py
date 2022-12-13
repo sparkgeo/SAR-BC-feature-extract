@@ -30,8 +30,8 @@ test_features = {
     "outside": "MULTILINESTRING ((102.1 -43.9, 102.1 -43.1, 105.5 -42))",
 }
 
-template_data_path = f"{settings.data_access_prefix}/trails-template.fgb"
-data_path = f"{settings.data_access_prefix}/trails.fgb"
+template_data_path = f"{settings.fgb_access_prefix}/trails-template.fgb"
+data_path = f"{settings.fgb_access_prefix}/trails.fgb"
 driver = ogr.GetDriverByName("FlatGeobuf")
 datasource = None
 layer = None

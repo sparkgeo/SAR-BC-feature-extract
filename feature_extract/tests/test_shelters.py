@@ -28,8 +28,8 @@ test_features = {
     "outside": "POINT (102.1 -43.9)",
 }
 
-template_data_path = f"{settings.data_access_prefix}/shelters-template.fgb"
-data_path = f"{settings.data_access_prefix}/shelters.fgb"
+template_data_path = f"{settings.fgb_access_prefix}/shelters-template.fgb"
+data_path = f"{settings.fgb_access_prefix}/shelters.fgb"
 driver = ogr.GetDriverByName("FlatGeobuf")
 datasource = None
 layer = None
