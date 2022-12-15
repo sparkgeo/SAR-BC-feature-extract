@@ -9,10 +9,12 @@ ${stack_common} run --rm api python -m feature_extract.util.output_layers "/outp
 format=FlatGeobuf
 
 echo "updating tippecanoe dependency"
-tippecanoe_image=tippecanoe_felt
 git submodule init
 git submodule update
-docker build -t ${tippecanoe_image} tippecanoe
+echo "building tippecanoe"
+scripts/build_tippecanoe.sh
+echo "building mbutil"
+scripts/build_mbutil.sh
 
 IFS=$'\n'
 set -f
@@ -36,7 +38,7 @@ for layer in $(cat < "/tmp/${layers_file}"); do
         osgeo/gdal:ubuntu-small-3.5.1 \
         ogr2ogr -f ${format} "/output/${layer}.fgb" "/input/${input_file}" "${layer_name}"
 
-    echo "converting ${PWD}/feature_extract/data/${input_file}.fgb to Vector Tile"
+    echo "converting ${PWD}/feature_extract/data/${layer}.fgb to Vector Tile"
     docker run \
         --rm \
         -v "${PWD}/feature_extract/data":/data \
@@ -47,5 +49,16 @@ for layer in $(cat < "/tmp/${layers_file}"); do
             --drop-densest-as-needed \
             -l ${layer} \
             "/data/${layer}.fgb"
+
+    echo "extracting ${PWD}/feature_extract/data/${layer}.mbtiles to tile files"
+    docker run \
+        --rm \
+        -v "${PWD}/feature_extract/data":/input \
+        -v "${PWD}/feature_extract/data/tiles":/output \
+        mbutil \
+        mb-util \
+            --image_format=pbf \
+            /input/${layer}.mbtiles \
+            /output/${layer}
 
 done
