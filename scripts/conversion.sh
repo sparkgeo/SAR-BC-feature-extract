@@ -51,6 +51,7 @@ for layer in $(cat < "/tmp/${layers_file}"); do
             --output="/data/${layer}.mbtiles" \
             --force \
             --drop-densest-as-needed \
+            --no-tile-compression \
             -l ${layer} \
             "/data/${layer}.fgb"
 
