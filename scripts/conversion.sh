@@ -12,9 +12,9 @@ echo "updating tippecanoe dependency"
 git submodule init
 git submodule update
 echo "building tippecanoe"
-scripts/build_tippecanoe.sh
+. scripts/build_tippecanoe.sh
 echo "building mbutil"
-scripts/build_mbutil.sh
+. scripts/build_mbutil.sh
 
 IFS=$'\n'
 set -f
@@ -36,13 +36,17 @@ for layer in $(cat < "/tmp/${layers_file}"); do
         -v "${input_mount}":/input \
         -v "${PWD}/feature_extract/data":/output \
         osgeo/gdal:ubuntu-small-3.5.1 \
-        ogr2ogr -f ${format} "/output/${layer}.fgb" "/input/${input_file}" "${layer_name}"
+        ogr2ogr \
+            -f ${format} \
+            "/output/${layer}.fgb" \
+            "/input/${input_file}" \
+            "${layer_name}"
 
-    echo "converting ${PWD}/feature_extract/data/${layer}.fgb to Vector Tile"
+    echo "converting ${input_mount}/${input_file} to Vector Tile"
     docker run \
         --rm \
         -v "${PWD}/feature_extract/data":/data \
-        ${tippecanoe_image} \
+        ${tippecanoe_image_name} \
         tippecanoe \
             --output="/data/${layer}.mbtiles" \
             --force \
@@ -51,11 +55,12 @@ for layer in $(cat < "/tmp/${layers_file}"); do
             "/data/${layer}.fgb"
 
     echo "extracting ${PWD}/feature_extract/data/${layer}.mbtiles to tile files"
+    rm -rf feature_extract/data/tiles/${layer}
     docker run \
         --rm \
         -v "${PWD}/feature_extract/data":/input \
         -v "${PWD}/feature_extract/data/tiles":/output \
-        mbutil \
+        ${mbutil_image_name} \
         mb-util \
             --image_format=pbf \
             /input/${layer}.mbtiles \

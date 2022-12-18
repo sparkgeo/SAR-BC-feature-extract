@@ -2,4 +2,5 @@
 
 pushd $(dirname $0)/..
 
-docker build -t mb-util util/mbutil
+export mbutil_image_name="mbutil"
+docker build -t ${mbutil_image_name} util/mbutil
