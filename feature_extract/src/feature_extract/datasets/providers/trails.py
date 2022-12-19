@@ -1,3 +1,5 @@
+from typing import Final, List
+
 from osgeo import ogr
 
 from feature_extract.common import (
@@ -8,6 +10,9 @@ from feature_extract.common import (
 from feature_extract.datasets.dataset_parameters import DatasetParameters
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
+
+NAME_FIELD_NAME: Final = "name"
+TYPE_FIELD_NAME: Final = "type"
 
 
 class Trails(DatasetProvider):
@@ -24,8 +29,8 @@ class Trails(DatasetProvider):
         src_layer = src_datasource.GetLayerByIndex(0)
 
         def title_provider(feature: ogr.Feature) -> str:
-            name = feature.GetFieldAsString("name")
-            type = feature.GetFieldAsString("type")
+            name = feature.GetFieldAsString(NAME_FIELD_NAME)
+            type = feature.GetFieldAsString(TYPE_FIELD_NAME)
             suffix = f" ({type})" if type else ""
             return f"{name}{suffix}"
 
@@ -61,6 +66,9 @@ class Trails(DatasetProvider):
 
     def get_ogr_type(self) -> int:
         return ogr.wkbMultiLineString
+
+    def get_required_field_names(self) -> List[str]:
+        return [NAME_FIELD_NAME, TYPE_FIELD_NAME]
 
 
 register_handler(Trails())

@@ -16,6 +16,7 @@ The following environment variables are optional:
 
 ## Development
 Assumes Python >= 3.8.
+Requires jq
 
 If no local debugging is required, and all development work is exercised exclusively via automated tests, no additional dependencies are required.
 - `scripts/test.sh` to execute tests

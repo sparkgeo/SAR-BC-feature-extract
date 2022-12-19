@@ -1,3 +1,5 @@
+from typing import Final, List
+
 from osgeo import ogr
 
 from feature_extract.common import (
@@ -8,6 +10,8 @@ from feature_extract.common import (
 from feature_extract.datasets.dataset_parameters import DatasetParameters
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
+
+NAME_FIELD_NAME: Final = "name"
 
 
 class Shelters(DatasetProvider):
@@ -24,7 +28,7 @@ class Shelters(DatasetProvider):
         src_layer = src_datasource.GetLayerByIndex(0)
 
         def title_provider(feature: ogr.Feature) -> str:
-            return feature.GetFieldAsString("name")
+            return feature.GetFieldAsString(NAME_FIELD_NAME)
 
         get_features_from_layer(
             src_layer,
@@ -61,6 +65,9 @@ class Shelters(DatasetProvider):
 
     def get_ogr_type(self) -> int:
         return ogr.wkbPoint
+
+    def get_required_field_names(self) -> List[str]:
+        return [NAME_FIELD_NAME]
 
 
 register_handler(Shelters())

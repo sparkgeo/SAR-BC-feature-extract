@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from os import path, stat
 from re import escape, sub
-from typing import Final
+from typing import Final, List
 
 from boto3 import session
 
@@ -49,6 +49,10 @@ class DatasetProvider(ABC):
 
     @abstractmethod
     def get_fgb_file_path(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_required_field_names(self) -> List[str]:
         pass
 
     def _get_fgb_file_name(self) -> str:

@@ -1,3 +1,5 @@
+from typing import Final, List
+
 from osgeo import ogr
 
 from feature_extract.common import (
@@ -11,6 +13,9 @@ from feature_extract.datasets.dataset_parameters import (
 )
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
+
+MAP_LABEL_FIELD_NAME: Final = "MAP_LABEL"
+LIFE_CYCLE_STATUS_CODE_FIELD_NAME: Final = "LIFE_CYCLE_STATUS_CODE"
 
 
 class ResourceRoads(DatasetProvider):
@@ -26,8 +31,8 @@ class ResourceRoads(DatasetProvider):
         src_layer = src_datasource.GetLayerByIndex(0)
 
         def title_provider(feature: ogr.Feature) -> str:
-            name = feature.GetFieldAsString("MAP_LABEL")
-            status = " (retired)" if feature.GetFieldAsString("LIFE_CYCLE_STATUS_CODE") == "RETIRED" else ""
+            name = feature.GetFieldAsString(MAP_LABEL_FIELD_NAME)
+            status = " (retired)" if feature.GetFieldAsString(LIFE_CYCLE_STATUS_CODE_FIELD_NAME) == "RETIRED" else ""
             return f"{name}{status}"
 
         get_features_from_layer(
@@ -62,6 +67,9 @@ class ResourceRoads(DatasetProvider):
 
     def get_ogr_type(self) -> int:
         return ogr.wkbMultiLineString
+
+    def get_required_field_names(self) -> List[str]:
+        return [MAP_LABEL_FIELD_NAME, LIFE_CYCLE_STATUS_CODE_FIELD_NAME]
 
 
 register_handler(ResourceRoads())
