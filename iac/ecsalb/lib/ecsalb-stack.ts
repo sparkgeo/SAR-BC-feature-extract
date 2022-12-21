@@ -77,7 +77,7 @@ export class EcsalbStack extends cdk.Stack {
         }),
         enableLogging: true,
         environment: {
-          "data_access_prefix": `/vsis3/${fgbData.bucketName}`,
+          "fgb_access_prefix": `/vsis3/${fgbData.bucketName}`,
           "creds_hash": credsHash
         }
       },
