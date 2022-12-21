@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
-from os import path, stat
 from re import escape, sub
 from typing import Final, List
 
@@ -12,8 +11,6 @@ from feature_extract.datasets.dataset_parameters import (
     DatasetParameters,
 )
 from feature_extract.settings import settings
-from feature_extract.vector_tile_request_parameters import VectorTileRequestParameters
-from feature_extract.vector_tile_response import VectorTileResponse
 
 logger: Final = getLogger(__file__)
 
@@ -70,27 +67,3 @@ class DatasetProvider(ABC):
             )
         else:
             raise NotImplementedError("Not yet a compelling need to support range proxying from local data")
-
-    def _get_mbt_file_name(self) -> str:
-        return f"{self.get_layer_name()}.mbtiles"
-
-    def get_vector_tile(self, parameters: VectorTileRequestParameters) -> VectorTileResponse:
-        cache_path = path.join(path.dirname(__file__), "cache", self._get_mbt_file_name())
-        if path.exists(cache_path):
-            local_last_modified = stat(cache_path).st_mtime * 1000
-        else:
-            local_last_modified = 0
-
-        head_response = self.s3_client.head_object(Bucket=settings.mbt_bucket_name, Key=self._get_mbt_file_name())
-        remote_last_modified = sub(r"[^\d]", "", str(head_response["LastModified"]))
-
-        logger.info(f"local last modified: {local_last_modified}, remote: {remote_last_modified}")
-
-        return None
-
-        # mbt_response = self.s3_client.get_object(
-        #     Bucket=self.mbt_bucket_name, Key=self._get_mbt_file_name()
-        # )
-        # return VectorTileResponse(
-        #     byte_iterator=tile_response["Body"].iter_chunks(),
-        # )

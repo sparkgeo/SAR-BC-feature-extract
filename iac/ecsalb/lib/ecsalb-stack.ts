@@ -39,12 +39,6 @@ export class EcsalbStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     })
 
-    const mbtData = new s3.Bucket(this, "mbtData", {
-      bucketName: "mbt-data",
-      removalPolicy: RemovalPolicy.DESTROY,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
-    })
-
     const vpcEndpoint = vpc.addGatewayEndpoint("S3Endpoint", {
       service: ec2.GatewayVpcEndpointAwsService.S3
     })

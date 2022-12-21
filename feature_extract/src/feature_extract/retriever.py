@@ -16,7 +16,6 @@ from feature_extract.datasets.dataset_parameters import (
 )
 from feature_extract.exceptions.unsupported_dataset import UnsupportedDatasetException
 from feature_extract.extract_request_parameters import ExtractRequestParameters
-from feature_extract.vector_tile_request_parameters import VectorTileRequestParameters
 
 
 def _get_name_for_export(prefix: str, x_min: float, y_min: float, x_max: float, y_max: float) -> str:
@@ -74,10 +73,6 @@ def get_fgb_bytes(
         range_start=parameters.range_start,
         range_end=parameters.range_end,
     )
-
-
-def get_vector_tile(parameters: VectorTileRequestParameters):
-    _validate_dataset(parameters)
 
 
 def _validate_dataset(parameters: Type[DatasetRequestParameters]) -> None:

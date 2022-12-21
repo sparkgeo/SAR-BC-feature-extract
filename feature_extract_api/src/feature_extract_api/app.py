@@ -101,11 +101,6 @@ async def export_types() -> List[DatasetInfo]:
     return list_datasets()
 
 
-@app.get("/{dataset}/{z}/{x}/{y}", dependencies=[Depends(check_credentials)])
-async def xyz_proxy(dataset: str, z: int, x: int, y: int) -> StreamingResponse:
-    pass
-
-
 @app.exception_handler(UnsupportedDatasetException)
 async def unicorn_exception_handler(_: Request, e: UnsupportedDatasetException):
     return JSONResponse(

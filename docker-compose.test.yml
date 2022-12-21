@@ -9,4 +9,3 @@ services:
     image: tomfumb/bvsar-feature-extract-api-test
     environment:
       fgb_access_prefix: /app/feature_extract/tests/data
-      mbt_bucket_name: mbt-data
