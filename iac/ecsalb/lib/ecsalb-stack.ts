@@ -50,13 +50,6 @@ export class EcsalbStack extends cdk.Stack {
       principals: [new iam.AnyPrincipal()]
     }))
 
-    mbtData.addToResourcePolicy(new iam.PolicyStatement({
-      actions: ["s3:GetObject"],
-      resources: [mbtData.arnForObjects("*")],
-      conditions: {"StringEquals": {"aws:SourceVpce": [vpcEndpoint.vpcEndpointId]}},
-      principals: [new iam.AnyPrincipal()]
-    }))
-
     const credsHashContextKey = "creds_hash"
     const credsHash = this.node.tryGetContext(credsHashContextKey)
     if (credsHash === undefined) {
