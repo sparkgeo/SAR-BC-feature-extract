@@ -1,10 +1,7 @@
 from pydantic import BaseModel, validator
 
 
-class ByteRangeParameters(BaseModel):
-
-    range_start: int
-    range_end: int
+class DatasetRequestParameters(BaseModel):
     dataset: str
 
     @validator("dataset")

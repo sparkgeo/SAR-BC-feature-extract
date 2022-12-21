@@ -16,6 +16,7 @@ The following environment variables are optional:
 
 ## Development
 Assumes Python >= 3.8.
+Requires jq
 
 If no local debugging is required, and all development work is exercised exclusively via automated tests, no additional dependencies are required.
 - `scripts/test.sh` to execute tests
@@ -43,7 +44,7 @@ If local debugging is required, GDAL must also be installed (tested with GDAL 3.
             "envFile": "${workspaceFolder}/minio/.env.creds",
             "env": {
                 "creds_hash": "$2b$12$85MauznOKD7Y7fi2oTDSw.HNMu5pnWvyqpd/6/WPVhMjafa3ztkTu",
-                "data_access_prefix": "/vsis3/bvsar",
+                "fgb_access_prefix": "/vsis3/fgb-data",
                 "AWS_S3_ENDPOINT": "localhost:9001",
                 "AWS_HTTPS": "NO",
                 "AWS_VIRTUAL_HOSTING": "FALSE"

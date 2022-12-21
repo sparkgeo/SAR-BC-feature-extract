@@ -9,12 +9,12 @@ from tests.common import use_test_data_dir
 with MonkeyPatch.context() as mp:
     use_test_data_dir(mp)
     from feature_extract.datasets.providers.shelters import Shelters
-    from feature_extract.extract_parameters import ExtractParameters
+    from feature_extract.extract_request_parameters import ExtractRequestParameters
     from feature_extract.retriever import count_features, get_features_file_path
     from feature_extract.settings import settings
 
 
-extract_parameters = ExtractParameters(
+extract_parameters = ExtractRequestParameters(
     lon_min=101,
     lon_max=102,
     lat_min=-45,
@@ -28,8 +28,8 @@ test_features = {
     "outside": "POINT (102.1 -43.9)",
 }
 
-template_data_path = f"{settings.data_access_prefix}/shelters-template.fgb"
-data_path = f"{settings.data_access_prefix}/shelters.fgb"
+template_data_path = f"{settings.fgb_access_prefix}/shelters-template.fgb"
+data_path = f"{settings.fgb_access_prefix}/shelters.fgb"
 driver = ogr.GetDriverByName("FlatGeobuf")
 datasource = None
 layer = None

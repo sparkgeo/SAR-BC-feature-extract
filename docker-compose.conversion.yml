@@ -7,7 +7,7 @@ services:
       context: .
     environment:
       creds_hash: ""
-      data_access_prefix: ""
+      fgb_access_prefix: ""
     volumes:
       - source: /tmp
         target: /output

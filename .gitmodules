@@ -1,3 +1,3 @@
 [submodule "tippecanoe"]
-	path = tippecanoe
+	path = util/tippecanoe
 	url = git@github.com:felt/tippecanoe.git

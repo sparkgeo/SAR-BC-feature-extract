@@ -13,11 +13,11 @@ from tests.common import use_test_data_dir
 with MonkeyPatch.context() as mp:
     use_test_data_dir(mp)
     from feature_extract.datasets.providers.resource_roads import ResourceRoads
-    from feature_extract.extract_parameters import ExtractParameters
+    from feature_extract.extract_request_parameters import ExtractRequestParameters
     from feature_extract.retriever import count_features, get_features_file_path
 
 
-extract_parameters = ExtractParameters(
+extract_parameters = ExtractRequestParameters(
     lon_min=-127.7234211789999989,
     lon_max=-127.6789652730000029,
     lat_min=54.8413454440000976,

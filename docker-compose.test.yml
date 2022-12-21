@@ -8,4 +8,4 @@ services:
         PIP_INSTALL_ARG: "[test]"
     image: tomfumb/bvsar-feature-extract-api-test
     environment:
-      data_access_prefix: /app/feature_extract/tests/data
+      fgb_access_prefix: /app/feature_extract/tests/data

@@ -1,3 +1,5 @@
+from typing import Final, List
+
 from osgeo import ogr
 
 from feature_extract.common import (
@@ -9,13 +11,16 @@ from feature_extract.datasets.dataset_parameters import DatasetParameters
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
 
+NAME_FIELD_NAME: Final = "name"
+TYPE_FIELD_NAME: Final = "type"
+
 
 class Trails(DatasetProvider):
     def __init__(self):
         super().__init__()
         self.dataset_name = "Trails"
         self.layer_name = "trails"
-        self.fgb_path = f"{settings.data_access_prefix}/{self.layer_name}.fgb"
+        self.fgb_path = f"{settings.fgb_access_prefix}/{self.layer_name}.fgb"
         self.driver = ogr.GetDriverByName("FlatGeobuf")
 
     def export_data(self, parameters: DatasetParameters) -> None:
@@ -24,8 +29,8 @@ class Trails(DatasetProvider):
         src_layer = src_datasource.GetLayerByIndex(0)
 
         def title_provider(feature: ogr.Feature) -> str:
-            name = feature.GetFieldAsString("name")
-            type = feature.GetFieldAsString("type")
+            name = feature.GetFieldAsString(NAME_FIELD_NAME)
+            type = feature.GetFieldAsString(TYPE_FIELD_NAME)
             suffix = f" ({type})" if type else ""
             return f"{name}{suffix}"
 
@@ -56,11 +61,14 @@ class Trails(DatasetProvider):
     def get_layer_name(self) -> str:
         return self.layer_name
 
-    def get_file_path(self) -> str:
+    def get_fgb_file_path(self) -> str:
         return self.fgb_path
 
     def get_ogr_type(self) -> int:
         return ogr.wkbMultiLineString
+
+    def get_required_field_names(self) -> List[str]:
+        return [NAME_FIELD_NAME, TYPE_FIELD_NAME]
 
 
 register_handler(Trails())
