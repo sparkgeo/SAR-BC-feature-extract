@@ -44,9 +44,14 @@ for layer in "${arr[@]}"; do
         | grep "Geometry Column" | sed -E 's/.+=[[:space:]]+(.+)/\1/g')
 
     echo "finding field names in ${input_mount}/${input_file}"
-    field_names=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name] | join(", ")' "/tmp/${layers_file}")
+    field_names=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name].field_names | join(", ")' "/tmp/${layers_file}")
+    filter_query=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name].filter_query // ""' "/tmp/${layers_file}")
 
     echo "converting ${input_mount}/${input_file} to FlatGeobuf"
+    where_clause=""
+    if [ "${filter_query}" != "" ]; then
+        where_clause=" WHERE ${filter_query}"
+    fi
     docker run \
         --rm \
         -v "${input_mount}":/input \
@@ -55,7 +60,8 @@ for layer in "${arr[@]}"; do
         ogr2ogr \
             -f ${format} \
             -dialect SQLite \
-            -sql "SELECT ${field_names}, ${geom_column} FROM ${layer_name}" \
+            -sql "SELECT ${field_names}, ${geom_column} FROM ${layer_name}${where_clause}" \
+            -t_srs "EPSG:4326" \
             "/output/${layer}.fgb" \
             "/input/${input_file}"
 

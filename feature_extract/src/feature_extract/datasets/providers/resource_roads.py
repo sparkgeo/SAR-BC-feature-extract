@@ -14,6 +14,7 @@ from feature_extract.datasets.dataset_parameters import (
 from feature_extract.datasets.dataset_provider import DatasetProvider
 from feature_extract.settings import settings
 
+TRANSPORT_LINE_ID_FIELD_NAME: Final = "TRANSPORT_LINE_ID"
 NAME_FIELD_NAME: Final = "STRUCTURED_NAME_1"
 DEACTIVATION_DATE_FIELD_NAME: Final = "DEACTIVATION_DATE"
 
@@ -69,7 +70,7 @@ class ResourceRoads(DatasetProvider):
         return ogr.wkbMultiLineString
 
     def get_required_field_names(self) -> List[str]:
-        return [NAME_FIELD_NAME, DEACTIVATION_DATE_FIELD_NAME]
+        return [TRANSPORT_LINE_ID_FIELD_NAME, NAME_FIELD_NAME, DEACTIVATION_DATE_FIELD_NAME]
 
     def get_filter_query(self) -> str:
         return "TRANSPORT_LINE_TYPE_CODE IN ('RU', 'RRD', 'RRN', 'RRS')"

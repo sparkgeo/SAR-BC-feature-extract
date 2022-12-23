@@ -8,7 +8,10 @@ def execute(
 ) -> None:
     config = {}
     for provider in get_dataset_providers():
-        config[provider.get_layer_name()] = provider.get_required_field_names()
+        config[provider.get_layer_name()] = {
+            "field_names": provider.get_required_field_names(),
+            "filter_query": provider.get_filter_query(),
+        }
     with open(output_path, "w") as f:
         f.write(json.dumps(config))
 
