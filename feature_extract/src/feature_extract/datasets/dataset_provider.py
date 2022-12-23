@@ -52,6 +52,9 @@ class DatasetProvider(ABC):
     def get_required_field_names(self) -> List[str]:
         pass
 
+    def get_filter_query(self) -> str:
+        return None
+
     def _get_fgb_file_name(self) -> str:
         return sub(rf"^{escape(settings.fgb_access_prefix)}/", "", self.get_fgb_file_path())
 
