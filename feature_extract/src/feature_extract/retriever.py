@@ -6,8 +6,8 @@ from typing import Type
 
 from osgeo import ogr
 
-from feature_extract.byte_range_request_parameters import ByteRangeRequestParameters
-from feature_extract.byte_range_response import ByteRangeResponse
+from feature_extract.bytes_request_parameters import BytesRequestParameters
+from feature_extract.bytes_response import BytesResponse
 from feature_extract.common import handlers, result_dir_path, result_layer_name
 from feature_extract.dataset_request_parameters import DatasetRequestParameters
 from feature_extract.datasets.dataset_parameters import (
@@ -65,13 +65,14 @@ def count_features(
     )
 
 
-def get_fgb_bytes(
-    parameters: ByteRangeRequestParameters,
-) -> ByteRangeResponse:
+def get_mbt_bytes(
+    parameters: BytesRequestParameters,
+) -> BytesResponse:
     _validate_dataset(parameters)
-    return handlers[parameters.dataset].dataset_provider.get_fgb_bytes(
-        range_start=parameters.range_start,
-        range_end=parameters.range_end,
+    return handlers[parameters.dataset].dataset_provider.get_mbt_bytes(
+        z=parameters.z,
+        x=parameters.x,
+        y=parameters.y,
     )
 
 

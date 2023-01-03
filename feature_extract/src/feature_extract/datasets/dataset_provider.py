@@ -5,7 +5,7 @@ from typing import Final, List
 
 from boto3 import session
 
-from feature_extract.byte_range_response import ByteRangeResponse
+from feature_extract.bytes_response import BytesResponse
 from feature_extract.datasets.dataset_parameters import (
     DatasetExportParameters,
     DatasetParameters,
@@ -58,15 +58,8 @@ class DatasetProvider(ABC):
     def _get_fgb_file_name(self) -> str:
         return sub(rf"^{escape(settings.fgb_access_prefix)}/", "", self.get_fgb_file_path())
 
-    def get_fgb_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
-        if self.s3_fgb_data_source:
-            range_response = self.s3_client.get_object(
-                Bucket=self.fgb_bucket_name, Key=self._get_fgb_file_name(), Range=f"bytes={range_start}-{range_end}"
-            )
-            return ByteRangeResponse(
-                content_range=range_response["ContentRange"],
-                content_type=range_response["ContentType"],
-                byte_iterator=range_response["Body"].iter_chunks(),
-            )
-        else:
-            raise NotImplementedError("Not yet a compelling need to support range proxying from local data")
+    def get_mbt_bytes(self, z: int, x: int, y: int) -> BytesResponse:
+        s3_response = self.s3_client.get_object(
+            Bucket=settings.mbt_bucket_name, Key=f"/{self.get_layer_name()}/{z}/{x}/{y}.pbf"
+        )
+        return BytesResponse(byte_iterator=s3_response["Body"].iter_chunks())
