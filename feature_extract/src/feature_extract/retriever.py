@@ -3,6 +3,7 @@ from json import dumps
 from os import path
 from re import IGNORECASE, sub
 from typing import Type
+from uuid import uuid4
 
 from osgeo import ogr
 
@@ -19,7 +20,7 @@ from feature_extract.extract_request_parameters import ExtractRequestParameters
 
 
 def _get_name_for_export(prefix: str, x_min: float, y_min: float, x_max: float, y_max: float) -> str:
-    return f"{prefix}-{md5(dumps([x_min, y_min, x_max, y_max]).encode('UTF-8')).hexdigest()}"
+    return f"{prefix}-{md5(dumps([x_min, y_min, x_max, y_max]).encode('UTF-8')).hexdigest()}-{str(uuid4())[8:]}"
 
 
 def get_features_file_path(
@@ -69,7 +70,7 @@ def get_mvt_bytes(
     parameters: BytesRequestParameters,
 ) -> BytesResponse:
     _validate_dataset(parameters)
-    return handlers[parameters.dataset].dataset_provider.get_mbt_bytes(
+    return handlers[parameters.dataset].dataset_provider.get_mvt_bytes(
         z=parameters.z,
         x=parameters.x,
         y=parameters.y,

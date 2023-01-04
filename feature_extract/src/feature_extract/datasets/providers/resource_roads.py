@@ -32,7 +32,12 @@ class ResourceRoads(DatasetProvider):
         src_layer = src_datasource.GetLayerByIndex(0)
 
         def title_provider(feature: ogr.Feature) -> str:
-            name = feature.GetFieldAsString(NAME_FIELD_NAME)
+            name_field_value = feature.GetFieldAsString(NAME_FIELD_NAME)
+            name = (
+                name_field_value
+                if name_field_value
+                else f"ID {feature.GetFieldAsInteger64(TRANSPORT_LINE_ID_FIELD_NAME)}"
+            )
             status = " (deac)" if feature.IsFieldNull(DEACTIVATION_DATE_FIELD_NAME) else ""
             return f"{name}{status}"
 

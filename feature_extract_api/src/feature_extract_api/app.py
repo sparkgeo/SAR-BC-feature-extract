@@ -87,11 +87,19 @@ async def export_types() -> List[DatasetInfo]:
     return list_datasets()
 
 
+@app.exception_handler(FileNotFoundError)
+async def file_not_found_exception(_: Request, e: FileNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"message": "not found"},
+    )
+
+
 @app.exception_handler(UnsupportedDatasetException)
-async def unicorn_exception_handler(_: Request, e: UnsupportedDatasetException):
+async def unsupported_dataset_exception(_: Request, e: UnsupportedDatasetException):
     return JSONResponse(
         status_code=404,
-        content={"message": f"{e} dataset not handled"},
+        content={"message": f"'{e}' dataset not handled"},
     )
 
 

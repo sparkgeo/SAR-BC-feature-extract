@@ -9,3 +9,4 @@ services:
     image: tomfumb/bvsar-feature-extract-api-test
     environment:
       fgb_access_prefix: /app/feature_extract/tests/data
+      mvt_bucket_name: tiles

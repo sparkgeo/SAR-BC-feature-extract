@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-  s3local:
+  http-tile-server:
     image: httpd:2.4
     volumes:
       - ./feature_extract/data:/usr/local/apache2/htdocs
@@ -13,14 +13,16 @@ services:
     image: tomfumb/bvsar-feature-extract-api
     ports:
       - 8023:80
+    volumes:
+      - type: bind
+        source: ${PWD}/feature_extract/data
+        target: /data
     environment:
-      # GDAL / FlatGeobuf config
-      AWS_S3_ENDPOINT: s3local
-      AWS_HTTPS: "NO"
-      AWS_VIRTUAL_HOSTING: "FALSE"
-      # API config
-      fgb_access_prefix: /vsis3/fgb-data
+      fgb_access_prefix: /data
       mvt_bucket_name: tiles
+      s3_endpoint: http-tile-server
+      AWS_ACCESS_KEY_ID: required_but_not_used
+      AWS_SECRET_ACCESS_KEY: required_but_not_used
     command: uvicorn feature_extract_api.app:app --host 0.0.0.0 --port 80 --reload
     healthcheck:
       test: curl -s http://localhost/ > /dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
@@ -28,7 +30,7 @@ services:
       timeout: 1s
       retries: 10
     depends_on:
-      - s3local
+      - http-tile-server
 
   ui:
     image: tomfumb/bvsar-feature-extract-ui

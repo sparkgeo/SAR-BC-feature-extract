@@ -62,7 +62,7 @@ for layer in "${arr[@]}"; do
             -dialect SQLite \
             -sql "SELECT ${field_names}, ${geom_column} FROM ${layer_name}${where_clause}" \
             -t_srs "EPSG:4326" \
-            "/output/fgb-data/${layer}.fgb" \
+            "/output/${layer}.fgb" \
             "/input/${input_file}"
 
     echo "converting ${input_mount}/${input_file} to Vector Tile"

@@ -42,12 +42,10 @@ If local debugging is required, GDAL must also be installed (tested with GDAL 3.
                 "--reload"
             ],
             "env": {
-                "creds_hash": "$2b$12$85MauznOKD7Y7fi2oTDSw.HNMu5pnWvyqpd/6/WPVhMjafa3ztkTu",
-                "fgb_access_prefix": "/vsis3/fgb-data",
+                "creds_hash": "...",
+                "fgb_access_prefix": "${workspaceFolder}/feature_extract/data",
                 "mvt_bucket_name": "tiles",
-                "AWS_S3_ENDPOINT": "s3local",
-                "AWS_HTTPS": "NO",
-                "AWS_VIRTUAL_HOSTING": "FALSE"
+                "s3_endpoint": "localhost:8987"
             },
             "console": "integratedTerminal",
             "justMyCode": false

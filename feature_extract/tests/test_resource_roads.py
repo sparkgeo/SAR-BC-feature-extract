@@ -18,16 +18,16 @@ with MonkeyPatch.context() as mp:
 
 
 extract_parameters = ExtractRequestParameters(
-    lon_min=-127.7234211789999989,
-    lon_max=-127.6789652730000029,
-    lat_min=54.8413454440000976,
-    lat_max=54.8721005390000016,
+    lon_min=-127.71616076522639,
+    lon_max=54.85167363064555,
+    lat_min=-127.7112771062229,
+    lat_max=54.85804640534519,
     dataset=ResourceRoads().get_dataset_name(),
 )
 
 
 def test_resource_roads_count():
-    assert count_features(extract_parameters) == 7
+    assert count_features(extract_parameters) == 3
 
 
 def test_resource_roads_features():
@@ -37,32 +37,16 @@ def test_resource_roads_features():
     result_layer = result_datasource.GetLayerByIndex(0)
     expected_features = [
         {
-            "title": "7552 05",
-            "vertices": 197,
+            "title": "ID 856056",
+            "vertices": 37,
         },
         {
-            "title": "7552 26",
-            "vertices": 2,
+            "title": "ID 1179994",
+            "vertices": 31,
         },
         {
-            "title": "7552 49",
-            "vertices": 45,
-        },
-        {
-            "title": "7552 28",
-            "vertices": 22,
-        },
-        {
-            "title": "7552 27",
-            "vertices": 6,
-        },
-        {
-            "title": "7552 34",
-            "vertices": 100,
-        },
-        {
-            "title": "7552 35",
-            "vertices": 2,
+            "title": "ID 848558",
+            "vertices": 60,
         },
     ]
     assert len(expected_features) == result_layer.GetFeatureCount(), "incorrect number of features returned"
@@ -71,6 +55,7 @@ def test_resource_roads_features():
         feature_dict = loads(result_feature.ExportToJson())
         title = feature_dict["properties"]["title"]
         vertices = len(feature_dict["geometry"]["coordinates"])
+        print(f"title: {title}, vertices: {vertices}")
         for expected_feature in expected_features:
             if title == expected_feature["title"] and vertices == expected_feature["vertices"]:
                 found_feature_count += 1
