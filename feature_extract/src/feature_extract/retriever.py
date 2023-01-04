@@ -65,7 +65,7 @@ def count_features(
     )
 
 
-def get_mbt_bytes(
+def get_mvt_bytes(
     parameters: BytesRequestParameters,
 ) -> BytesResponse:
     _validate_dataset(parameters)

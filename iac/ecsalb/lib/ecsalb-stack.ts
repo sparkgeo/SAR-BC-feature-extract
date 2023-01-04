@@ -39,8 +39,8 @@ export class EcsalbStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     })
 
-    const mbtData = new s3.Bucket(this, "mbtData", {
-      bucketName: "mbt-data",
+    const mvtData = new s3.Bucket(this, "mvtData", {
+      bucketName: "mvt-data",
       removalPolicy: RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     })
@@ -56,9 +56,9 @@ export class EcsalbStack extends cdk.Stack {
       principals: [new iam.AnyPrincipal()]
     }))
 
-    mbtData.addToResourcePolicy(new iam.PolicyStatement({
+    mvtData.addToResourcePolicy(new iam.PolicyStatement({
       actions: ["s3:GetObject"],
-      resources: [mbtData.arnForObjects("*")],
+      resources: [mvtData.arnForObjects("*")],
       conditions: {"StringEquals": {"aws:SourceVpce": [vpcEndpoint.vpcEndpointId]}},
       principals: [new iam.AnyPrincipal()]
     }))

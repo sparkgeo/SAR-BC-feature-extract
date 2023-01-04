@@ -24,7 +24,7 @@ class DatasetProvider(ABC):
             s3_config["use_ssl"] = use_https
             s3_config["endpoint_url"] = "{}://{}".format(s3_scheme, settings.AWS_S3_ENDPOINT)
         self.s3_client = session.Session().client(**s3_config)
-        self.s3_fgb_data_source = settings.fgb_access_prefix.startswith("/vsis3/")
+        self.s3_fgb_data_source = settings.fgb_access_prefix.startswith("/vsis3")
         if self.s3_fgb_data_source:
             self.fgb_bucket_name = "/".join(settings.fgb_access_prefix.split("/")[2:])
 
@@ -58,8 +58,10 @@ class DatasetProvider(ABC):
     def _get_fgb_file_name(self) -> str:
         return sub(rf"^{escape(settings.fgb_access_prefix)}/", "", self.get_fgb_file_path())
 
-    def get_mbt_bytes(self, z: int, x: int, y: int) -> BytesResponse:
+    def get_mvt_bytes(self, z: int, x: int, y: int) -> BytesResponse:
         s3_response = self.s3_client.get_object(
-            Bucket=settings.mbt_bucket_name, Key=f"/{self.get_layer_name()}/{z}/{x}/{y}.pbf"
+            Bucket=settings.mvt_bucket_name, Key=f"{self.get_layer_name()}/{z}/{x}/{y}.pbf"
         )
-        return BytesResponse(byte_iterator=s3_response["Body"].iter_chunks())
+        return BytesResponse(
+            byte_iterator=s3_response["Body"].iter_chunks(), content_type="application/vnd.mapbox-vector-tile"
+        )

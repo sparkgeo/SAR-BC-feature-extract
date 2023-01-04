@@ -41,11 +41,11 @@ If local debugging is required, GDAL must also be installed (tested with GDAL 3.
                 "--port", "8123",
                 "--reload"
             ],
-            "envFile": "${workspaceFolder}/minio/.env.creds",
             "env": {
                 "creds_hash": "$2b$12$85MauznOKD7Y7fi2oTDSw.HNMu5pnWvyqpd/6/WPVhMjafa3ztkTu",
                 "fgb_access_prefix": "/vsis3/fgb-data",
-                "AWS_S3_ENDPOINT": "localhost:9001",
+                "mvt_bucket_name": "tiles",
+                "AWS_S3_ENDPOINT": "s3local",
                 "AWS_HTTPS": "NO",
                 "AWS_VIRTUAL_HOSTING": "FALSE"
             },

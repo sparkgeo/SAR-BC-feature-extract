@@ -14,7 +14,7 @@ from feature_extract.extract_request_parameters import ExtractRequestParameters
 from feature_extract.retriever import (
     count_features,
     get_features_file_path,
-    get_mbt_bytes,
+    get_mvt_bytes,
 )
 from feature_extract_api.settings import settings
 
@@ -66,9 +66,9 @@ async def count(dataset: str, x_min: float, y_min: float, x_max: float, y_max: f
     )
 
 
-@app.get("/{dataset}/mbt/{z}/{x}/{y}")
+@app.get("/{dataset}/mvt/{z}/{x}/{y}")
 async def mbt_proxy(dataset: str, z: int, x: int, y: int) -> StreamingResponse:
-    tile_response = get_mbt_bytes(
+    tile_response = get_mvt_bytes(
         BytesRequestParameters(
             dataset=dataset,
             z=z,
@@ -79,9 +79,6 @@ async def mbt_proxy(dataset: str, z: int, x: int, y: int) -> StreamingResponse:
     return StreamingResponse(
         tile_response.byte_iterator,
         media_type=tile_response.content_type,
-        headers={
-            "Content-Range": tile_response.content_range,
-        },
     )
 
 
