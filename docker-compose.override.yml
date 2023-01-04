@@ -15,7 +15,7 @@ services:
       - 8023:80
     volumes:
       - type: bind
-        source: ${PWD}/feature_extract/data
+        source: ${PWD}/feature_extract/data/fgb-data
         target: /data
     environment:
       fgb_access_prefix: /data
