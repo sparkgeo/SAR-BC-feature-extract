@@ -8,6 +8,7 @@ services:
     environment:
       creds_hash: ""
       fgb_access_prefix: ""
+      mbt_bucket_name: ""
     volumes:
       - source: /tmp
         target: /output
