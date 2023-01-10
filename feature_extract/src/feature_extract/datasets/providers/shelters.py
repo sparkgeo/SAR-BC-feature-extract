@@ -70,4 +70,4 @@ class Shelters(DatasetProvider):
         return [NAME_FIELD_NAME]
 
 
-register_handler(Shelters())
+# register_handler(Shelters())

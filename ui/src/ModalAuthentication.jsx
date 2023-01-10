@@ -23,12 +23,11 @@ function ModalAuthentication() {
         setError("auth");
         setLoading(false);
       } else if (response.status === 200) {
-        const data = await response.json();
-        initializeLayers(data);
-
         setAuthParams({ user, pass });
         localStorage.setItem("auth", JSON.stringify({ user, pass }));
         setAuthenticated(true);
+        const data = await response.json();
+        initializeLayers(data);
       } else {
         setError("server");
         setLoading(false);

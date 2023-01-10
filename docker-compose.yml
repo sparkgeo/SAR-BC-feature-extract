@@ -10,9 +10,6 @@ services:
     environment:
       creds_hash: ${creds_hash}
     volumes:
-      - type: bind
-        source: ./feature_extract
-        target: /app/feature_extract
-      - type: bind
-        source: ./feature_extract_api
-        target: /app/feature_extract_api
+      - ./feature_extract:/app/feature_extract
+      - ./feature_extract_api:/app/feature_extract_api
+

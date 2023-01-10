@@ -14,9 +14,7 @@ services:
     ports:
       - 8023:80
     volumes:
-      - type: bind
-        source: ${PWD}/feature_extract/data/fgb-data
-        target: /data
+      - ${PWD}/feature_extract/data/fgb-data:/data
     environment:
       fgb_access_prefix: /data
       mvt_bucket_name: tiles
@@ -42,9 +40,8 @@ services:
     env_file:
       - ./ui/.env.docker
     volumes:
-      - source: ./ui
-        target: /app
-        type: bind
+      - ./ui:/asset-input
+      - /asset-input/node_modules
     depends_on:
       api:
         condition: service_healthy

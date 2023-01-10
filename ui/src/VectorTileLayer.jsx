@@ -14,7 +14,7 @@ const generateEmptyFeatureClass = () => ({
 /**
  * Generates a source and layer for a flatgeobuf dile
  */
-function FlatgeobufLayer(props) {
+function VectorTileLayer(props) {
   const { name, type, enabled, index } = props;
   if (["point", "polygon", "line"].indexOf(type) === -1)
     throw new Error(`Unknown type "${type}" in layer ${name}`);
@@ -22,7 +22,7 @@ function FlatgeobufLayer(props) {
   const [data, setData] = useState(null);
 
   const { current: map } = useMap();
-  const apiEndpoint = useMemo(() => `${baseApi}/${name}/fgb`, [name, baseApi]);
+  const apiEndpoint = useMemo(() => `${baseApi}/${name}/mvt/{z}/{x}/{y}`, [name, baseApi]);
 
   // const zoom = map.getZoom();
   // const bounds = map.getBounds();
@@ -42,36 +42,43 @@ function FlatgeobufLayer(props) {
     };
   }, []);
 
-  useEffect(() => {
-    async function retrieveData() {
-      const [minX, minY, maxX, maxY] = bounds.split(",");
-      const mapBounds = {
-        minX,
-        minY,
-        maxX,
-        maxY,
-      };
 
-      let i = 0;
-      const fc = generateEmptyFeatureClass();
-      const iterable = geojson.deserialize(apiEndpoint, mapBounds);
-      for await (let feature of iterable) {
-        fc.features.push({ ...feature, id: i });
-        i += 1;
-      }
-      setData(fc);
-    }
-
-    if (enabled && bounds) retrieveData();
-  }, [bounds, enabled]);
-
-  if (!data) return <></>;
+  // if (!data) return <></>;
 
   return (
-    <Source type="geojson" id={name} data={data}>
-      <Layer {...mapLayerStyle({ enabled, type, index })} />
-    </Source>
+    <>
+    <Source id={name} type='vector' tiles={[apiEndpoint]} vector_layers={[{
+            "id": "TRANSPORT_LINE",
+            "description": "",
+            "minzoom": 0,
+            "maxzoom": 14,
+            "fields": {
+                "DEACTIVATION_DATE": "String",
+                "STRUCTURED_NAME_1": "String",
+                "TRANSPORT_LINE_ID": "Mixed"
+            }
+        }]}></Source>
+    <Layer
+        id={name}
+        type={type}
+        source={name}
+        source-layer="TRANSPORT_LINE"
+        layout={{
+            'line-join': 'round',
+            'line-cap': 'round'
+        }}
+        paint={{
+            'line-color': '#e1ad01',
+            'line-width': 1
+        }}
+    ></Layer>
+    </>
+    
+
+    // <Source type="geojson" id={name} data={data}>
+    //   <Layer {...mapLayerStyle({ enabled, type, index })} />
+    // </Source>
   );
 }
 
-export default FlatgeobufLayer;
+export default VectorTileLayer;

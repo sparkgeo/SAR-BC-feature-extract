@@ -71,4 +71,4 @@ class Trails(DatasetProvider):
         return [NAME_FIELD_NAME, TYPE_FIELD_NAME]
 
 
-register_handler(Trails())
+# register_handler(Trails())
