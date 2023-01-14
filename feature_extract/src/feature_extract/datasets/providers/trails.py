@@ -70,5 +70,8 @@ class Trails(DatasetProvider):
     def get_required_field_names(self) -> List[str]:
         return [NAME_FIELD_NAME, TYPE_FIELD_NAME]
 
+    def get_colour_hex(self) -> str:
+        return "E145F3"
 
-# register_handler(Trails())
+
+register_handler(Trails())

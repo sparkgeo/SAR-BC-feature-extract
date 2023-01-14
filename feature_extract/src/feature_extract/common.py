@@ -37,6 +37,7 @@ def list_datasets() -> List[DatasetInfo]:
             DatasetInfo(
                 name=value.dataset_provider.get_dataset_name(),
                 type=feature_type_map[value.feature_type],
+                mvt_metadata=value.dataset_provider.get_mvt_metadata(),
             )
             for value in handlers.values()
         ]

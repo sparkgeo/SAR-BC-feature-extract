@@ -1,23 +1,4 @@
-// List of htmlSafeColors
-const colors = [
-  "blue",
-  "navy",
-  "red",
-  "fuchsia",
-  "green",
-  "aqua",
-  "yellow",
-  "gray",
-  "lime",
-  "maroon",
-  "olive",
-  "purple",
-  "silver",
-  "teal",
-  "white",
-];
-
-const lineLayer = (enabled, index) => ({
+const lineLayer = (enabled, colour_hex) => ({
   type: "line",
   layout: {
     visibility: enabled ? "visible" : "none",
@@ -25,34 +6,34 @@ const lineLayer = (enabled, index) => ({
     "line-cap": "round",
   },
   paint: {
-    "line-color": colors[index],
+    "line-color": `#${colour_hex}`,
     "line-width": 2,
   },
 });
 
-const fillLayer = (enabled, index) => {
+const fillLayer = (enabled, colour_hex) => {
   throw new Error("Fill layer not implemented");
 };
 
-const pointLayer = (enabled, index) => ({
+const pointLayer = (enabled, colour_hex) => ({
   type: "circle",
   paint: {
     // Make circles larger as the user zooms from z12 to z22.
     "circle-radius": 5,
     // Color circles by shelter, using a `match` expression.
-    "circle-color": colors[index],
+    "circle-color": `#${colour_hex}`,
   },
   layout: {
     visibility: enabled ? "visible" : "none",
   },
 });
 
-export const mapLayerStyle = ({ enabled, index, type }) => {
+export const mapLayerStyle = ({ enabled, type, colour_hex }) => {
   const options = {
     point: pointLayer,
     line: lineLayer,
     fill: fillLayer,
   };
 
-  return options[type](enabled, index);
+  return options[type](enabled, colour_hex);
 };

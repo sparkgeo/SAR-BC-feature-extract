@@ -2,20 +2,14 @@ import { useEffect, useState, useMemo } from "react";
 import { useMap, Source, Layer } from "react-map-gl";
 
 import { mapLayerStyle } from "./util/map-styles";
-import { geojson } from "flatgeobuf";
 
 const baseApi = import.meta.env.VITE_API_BASE;
 
-const generateEmptyFeatureClass = () => ({
-  type: "FeatureCollection",
-  features: [],
-});
-
 /**
- * Generates a source and layer for a flatgeobuf dile
+ * Generates a source and layer for a mapbox vector tile source
  */
 function VectorTileLayer(props) {
-  const { name, type, enabled, index } = props;
+  const { name, type, metadata, enabled } = props;
   if (["point", "polygon", "line"].indexOf(type) === -1)
     throw new Error(`Unknown type "${type}" in layer ${name}`);
   const [bounds, setBounds] = useState(null);
@@ -23,9 +17,6 @@ function VectorTileLayer(props) {
 
   const { current: map } = useMap();
   const apiEndpoint = useMemo(() => `${baseApi}/${name}/mvt/{z}/{x}/{y}`, [name, baseApi]);
-
-  // const zoom = map.getZoom();
-  // const bounds = map.getBounds();
 
   useEffect(() => {
     function updateBounds() {
@@ -42,42 +33,19 @@ function VectorTileLayer(props) {
     };
   }, []);
 
-
-  // if (!data) return <></>;
-
-  return (
+  return (enabled ?
     <>
-    <Source id={name} type='vector' tiles={[apiEndpoint]} vector_layers={[{
-            "id": "TRANSPORT_LINE",
-            "description": "",
-            "minzoom": 0,
-            "maxzoom": 14,
-            "fields": {
-                "DEACTIVATION_DATE": "String",
-                "STRUCTURED_NAME_1": "String",
-                "TRANSPORT_LINE_ID": "Mixed"
-            }
-        }]}></Source>
-    <Layer
-        id={name}
-        type={type}
-        source={name}
-        source-layer="TRANSPORT_LINE"
-        layout={{
-            'line-join': 'round',
-            'line-cap': 'round'
-        }}
-        paint={{
-            'line-color': '#e1ad01',
-            'line-width': 1
-        }}
-    ></Layer>
+      <Source id={name} type='vector' tiles={[apiEndpoint]} vector_layers={[metadata]}></Source>
+      <Layer
+          id={name}
+          type={type}
+          source={name}
+          source-layer={metadata.id}
+          {...mapLayerStyle({ enabled, type, colour_hex: metadata.colour_hex })}
+      ></Layer>
     </>
-    
-
-    // <Source type="geojson" id={name} data={data}>
-    //   <Layer {...mapLayerStyle({ enabled, type, index })} />
-    // </Source>
+    :
+    <></>
   );
 }
 

@@ -80,5 +80,8 @@ class ResourceRoads(DatasetProvider):
     def get_filter_query(self) -> str:
         return "TRANSPORT_LINE_TYPE_CODE IN ('RU', 'RRD', 'RRN', 'RRS')"
 
+    def get_colour_hex(self) -> str:
+        return "F3B745"
+
 
 register_handler(ResourceRoads())

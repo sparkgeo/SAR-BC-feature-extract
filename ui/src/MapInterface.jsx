@@ -32,7 +32,7 @@ function MapInterface() {
   const zoom = import.meta.env.VITE_MAP_INIT_ZOOM ?? 4;
 
   const requestAuthorizer = (url, resourceType) => {
-    if (resourceType === 'Tile' && url.startsWith(baseApi)) {
+    if (url.startsWith(baseApi)) {
       return {
         url: url,
         headers: { 'Authorization': 'Basic ' + base64.encode(`${user}:${pass}`) }
@@ -49,13 +49,13 @@ function MapInterface() {
           mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
           transformRequest={requestAuthorizer}
         >
-          {Object.values(layersStatus).map(({ name, type, enabled }, index) => (
+          {Object.values(layersStatus).map(({ name, type, mvt_metadata, enabled }) => (
             <VectorTileLayer
               name={name}
               type={type}
+              metadata={mvt_metadata}
               enabled={enabled}
               key={name}
-              index={index}
             />
           ))}
           <MapBoundsRetrieval />
