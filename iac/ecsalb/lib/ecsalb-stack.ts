@@ -39,6 +39,12 @@ export class EcsalbStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     })
 
+    const mvtData = new s3.Bucket(this, "mvtData", {
+      bucketName: "mvt-data",
+      removalPolicy: RemovalPolicy.DESTROY,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+    })
+
     const vpcEndpoint = vpc.addGatewayEndpoint("S3Endpoint", {
       service: ec2.GatewayVpcEndpointAwsService.S3
     })
@@ -46,6 +52,13 @@ export class EcsalbStack extends cdk.Stack {
     fgbData.addToResourcePolicy(new iam.PolicyStatement({
       actions: ["s3:GetObject"],
       resources: [fgbData.arnForObjects("*")],
+      conditions: {"StringEquals": {"aws:SourceVpce": [vpcEndpoint.vpcEndpointId]}},
+      principals: [new iam.AnyPrincipal()]
+    }))
+
+    mvtData.addToResourcePolicy(new iam.PolicyStatement({
+      actions: ["s3:GetObject"],
+      resources: [mvtData.arnForObjects("*")],
       conditions: {"StringEquals": {"aws:SourceVpce": [vpcEndpoint.vpcEndpointId]}},
       principals: [new iam.AnyPrincipal()]
     }))
@@ -77,7 +90,8 @@ export class EcsalbStack extends cdk.Stack {
         }),
         enableLogging: true,
         environment: {
-          "data_access_prefix": `/vsis3/${fgbData.bucketName}`,
+          "fgb_access_prefix": `/vsis3/${fgbData.bucketName}`,
+          "mvt_bucket_name": mvtData.bucketName,
           "creds_hash": credsHash
         }
       },

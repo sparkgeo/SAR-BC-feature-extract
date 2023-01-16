@@ -3,7 +3,6 @@ from typing import Iterator
 
 
 @dataclass
-class ByteRangeResponse:
-    content_range: str
-    content_type: str
+class BytesResponse:
     byte_iterator: Iterator[bytes]
+    content_type: str

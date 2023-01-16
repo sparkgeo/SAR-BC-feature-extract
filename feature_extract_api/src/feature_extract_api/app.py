@@ -1,13 +1,12 @@
-from re import match, sub
-from typing import List, Union
+from typing import List
 
 from bcrypt import checkpw
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from feature_extract.byte_range_request_parameters import ByteRangeRequestParameters
+from feature_extract.bytes_request_parameters import BytesRequestParameters
 from feature_extract.common import list_datasets
 from feature_extract.datasets.dataset_info import DatasetInfo
 from feature_extract.exceptions.unsupported_dataset import UnsupportedDatasetException
@@ -15,7 +14,7 @@ from feature_extract.extract_request_parameters import ExtractRequestParameters
 from feature_extract.retriever import (
     count_features,
     get_features_file_path,
-    get_fgb_bytes,
+    get_mvt_bytes,
 )
 from feature_extract_api.settings import settings
 
@@ -35,10 +34,10 @@ def check_credentials(credentials: HTTPBasicCredentials = Depends(auth)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-app = FastAPI(docs_url="/")
+app = FastAPI(docs_url="/", dependencies=[Depends(check_credentials)])
 
 
-@app.get("/{dataset}/export/{x_min}/{y_min}/{x_max}/{y_max}", dependencies=[Depends(check_credentials)])
+@app.get("/{dataset}/export/{x_min}/{y_min}/{x_max}/{y_max}")
 async def export(dataset: str, x_min: float, y_min: float, x_max: float, y_max: float) -> FileResponse:
     return FileResponse(
         get_features_file_path(
@@ -54,7 +53,7 @@ async def export(dataset: str, x_min: float, y_min: float, x_max: float, y_max: 
     )
 
 
-@app.get("/{dataset}/count/{x_min}/{y_min}/{x_max}/{y_max}", dependencies=[Depends(check_credentials)])
+@app.get("/{dataset}/count/{x_min}/{y_min}/{x_max}/{y_max}")
 async def count(dataset: str, x_min: float, y_min: float, x_max: float, y_max: float) -> int:
     return count_features(
         ExtractRequestParameters(
@@ -67,45 +66,40 @@ async def count(dataset: str, x_min: float, y_min: float, x_max: float, y_max: f
     )
 
 
-@app.get("/{dataset}/fgb")
-async def fgb_proxy(dataset: str, range: Union[str, None] = Header(default=None)) -> StreamingResponse:
-    if range is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="range header is required",
-        )
-    if not match(r"^bytes=\d+\-\d+$", range):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"range header format incorrect. Must be 'bytes=N-M' but is {range}",
-        )
-    range_start, range_end = sub(r"^bytes=", "", range).split("-")
-    range_response = get_fgb_bytes(
-        ByteRangeRequestParameters(
-            range_start=int(range_start),
-            range_end=int(range_end),
+@app.get("/{dataset}/mvt/{z}/{x}/{y}")
+async def mbt_proxy(dataset: str, z: int, x: int, y: int) -> StreamingResponse:
+    tile_response = get_mvt_bytes(
+        BytesRequestParameters(
             dataset=dataset,
+            z=z,
+            x=x,
+            y=y,
         )
     )
     return StreamingResponse(
-        range_response.byte_iterator,
-        media_type=range_response.content_type,
-        headers={
-            "Content-Range": range_response.content_range,
-        },
+        tile_response.byte_iterator,
+        media_type=tile_response.content_type,
     )
 
 
-@app.get("/list", dependencies=[Depends(check_credentials)], response_model=List[DatasetInfo])
+@app.get("/list", response_model=List[DatasetInfo])
 async def export_types() -> List[DatasetInfo]:
     return list_datasets()
 
 
+@app.exception_handler(FileNotFoundError)
+async def file_not_found_exception(_: Request, e: FileNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"message": "not found"},
+    )
+
+
 @app.exception_handler(UnsupportedDatasetException)
-async def unicorn_exception_handler(_: Request, e: UnsupportedDatasetException):
+async def unsupported_dataset_exception(_: Request, e: UnsupportedDatasetException):
     return JSONResponse(
         status_code=404,
-        content={"message": f"{e} dataset not handled"},
+        content={"message": f"'{e}' dataset not handled"},
     )
 
 

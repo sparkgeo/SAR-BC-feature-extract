@@ -1,15 +1,18 @@
 from abc import ABC, abstractmethod
+from json import loads
 from logging import getLogger
 from re import escape, sub
 from typing import Final, List
 
 from boto3 import session
+from botocore.exceptions import ClientError
 
-from feature_extract.byte_range_response import ByteRangeResponse
+from feature_extract.bytes_response import BytesResponse
 from feature_extract.datasets.dataset_parameters import (
     DatasetExportParameters,
     DatasetParameters,
 )
+from feature_extract.mvt_metadata_response import MvtMetadataResponse
 from feature_extract.settings import settings
 
 logger: Final = getLogger(__file__)
@@ -18,15 +21,10 @@ logger: Final = getLogger(__file__)
 class DatasetProvider(ABC):
     def __init__(self):
         s3_config = {"service_name": "s3"}
-        if settings.AWS_S3_ENDPOINT:
-            use_https = settings.AWS_HTTPS != "NO"
-            s3_scheme = "https" if use_https else "http"
-            s3_config["use_ssl"] = use_https
-            s3_config["endpoint_url"] = "{}://{}".format(s3_scheme, settings.AWS_S3_ENDPOINT)
+        if settings.s3_endpoint:
+            s3_config["use_ssl"] = False
+            s3_config["endpoint_url"] = f"http://{settings.s3_endpoint}"
         self.s3_client = session.Session().client(**s3_config)
-        self.s3_fgb_data_source = settings.fgb_access_prefix.startswith("/vsis3/")
-        if self.s3_fgb_data_source:
-            self.fgb_bucket_name = "/".join(settings.fgb_access_prefix.split("/")[2:])
 
     @abstractmethod
     def export_data(self, parameters: DatasetExportParameters) -> None:
@@ -49,21 +47,55 @@ class DatasetProvider(ABC):
         pass
 
     @abstractmethod
+    def get_ogr_type(self) -> int:
+        pass
+
+    @abstractmethod
     def get_required_field_names(self) -> List[str]:
         pass
+
+    def get_filter_query(self) -> str:
+        return None
 
     def _get_fgb_file_name(self) -> str:
         return sub(rf"^{escape(settings.fgb_access_prefix)}/", "", self.get_fgb_file_path())
 
-    def get_fgb_bytes(self, range_start: int, range_end: int) -> ByteRangeResponse:
-        if self.s3_fgb_data_source:
-            range_response = self.s3_client.get_object(
-                Bucket=self.fgb_bucket_name, Key=self._get_fgb_file_name(), Range=f"bytes={range_start}-{range_end}"
+    def get_mvt_bytes(self, z: int, x: int, y: int) -> BytesResponse:
+        try:
+            s3_response = self.s3_client.get_object(
+                Bucket=settings.mvt_bucket_name, Key=f"{self.get_layer_name()}/{z}/{x}/{y}.pbf"
             )
-            return ByteRangeResponse(
-                content_range=range_response["ContentRange"],
-                content_type=range_response["ContentType"],
-                byte_iterator=range_response["Body"].iter_chunks(),
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                raise FileNotFoundError()
+            else:
+                logger.exception("Unknown exception getting tile from S3", e)
+                raise Exception()
+        return BytesResponse(
+            byte_iterator=s3_response["Body"].iter_chunks(), content_type="application/vnd.mapbox-vector-tile"
+        )
+
+    @abstractmethod
+    def get_colour_hex(self) -> str:
+        pass
+
+    def get_mvt_metadata(self) -> MvtMetadataResponse:
+        try:
+            s3_response = self.s3_client.get_object(
+                Bucket=settings.mvt_bucket_name, Key=f"{self.get_layer_name()}/metadata.json"
             )
-        else:
-            raise NotImplementedError("Not yet a compelling need to support range proxying from local data")
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                raise FileNotFoundError()
+            else:
+                logger.exception("Unknown exception getting tile metadata from S3", e)
+                raise Exception()
+        metadata_json = s3_response["Body"].read().decode("UTF-8")
+        metadata = loads(metadata_json)
+        return MvtMetadataResponse(
+            id=self.get_layer_name(),
+            minzoom=metadata["minzoom"],
+            maxzoom=metadata["maxzoom"],
+            fields=list(loads(metadata["json"])["vector_layers"][0]["fields"].keys()),
+            colour_hex=self.get_colour_hex(),
+        )

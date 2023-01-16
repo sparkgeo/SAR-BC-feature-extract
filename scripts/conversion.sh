@@ -20,13 +20,10 @@ while IFS='' read -r line; do
    arr+=("$line")
 done < <(jq -r 'keys[]' /tmp/${layers_file})
 
-for layer in "${arr[@]}"; do
+for layer_name in "${arr[@]}"; do
     echo
-    read -p "Path to source file for layer ${layer} (include filename): " source_file_path
+    read -p "Path to source file for layer ${layer_name} (include filename or .gdb directory if File GeoDatabase): " source_file_path
     echo ${source_file_path}
-    read -p "Name of source layer for layer ${layer} [${layer}]: " source_layer
-    layer_name=${source_layer:-$layer}
-    echo ${layer_name}
 
     input_mount=$(dirname "${source_file_path}")
     input_file=$(basename "${source_file_path}")
@@ -44,9 +41,15 @@ for layer in "${arr[@]}"; do
         | grep "Geometry Column" | sed -E 's/.+=[[:space:]]+(.+)/\1/g')
 
     echo "finding field names in ${input_mount}/${input_file}"
-    field_names=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name] | join(", ")' "/tmp/${layers_file}")
+    field_names=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name].field_names | join(", ")' "/tmp/${layers_file}")
+    filter_query=$(jq --arg layer_name "${layer_name}" -r '.[$layer_name].filter_query // ""' "/tmp/${layers_file}")
 
     echo "converting ${input_mount}/${input_file} to FlatGeobuf"
+    where_clause=""
+    if [ "${filter_query}" != "" ]; then
+        where_clause=" WHERE ${filter_query}"
+    fi
+    mkdir -p feature_extract/data/fgb-data
     docker run \
         --rm \
         -v "${input_mount}":/input \
@@ -55,8 +58,9 @@ for layer in "${arr[@]}"; do
         ogr2ogr \
             -f ${format} \
             -dialect SQLite \
-            -sql "SELECT ${field_names}, ${geom_column} FROM ${layer_name}" \
-            "/output/${layer}.fgb" \
+            -sql "SELECT ${field_names}, ${geom_column} FROM ${layer_name}${where_clause}" \
+            -t_srs "EPSG:4326" \
+            "/output/fgb-data/${layer_name}.fgb" \
             "/input/${input_file}"
 
     echo "converting ${input_mount}/${input_file} to Vector Tile"
@@ -65,15 +69,16 @@ for layer in "${arr[@]}"; do
         -v "${PWD}/feature_extract/data":/data \
         ${tippecanoe_image_name} \
         tippecanoe \
-            --output="/data/${layer}.mbtiles" \
+            --output="/data/${layer_name}.mbtiles" \
             --force \
             --drop-densest-as-needed \
             --no-tile-compression \
-            -l ${layer} \
-            "/data/${layer}.fgb"
+            -l ${layer_name} \
+            "/data/fgb-data/${layer_name}.fgb"
 
-    echo "extracting ${PWD}/feature_extract/data/${layer}.mbtiles to tile files"
-    rm -rf feature_extract/data/tiles/${layer}
+    echo "extracting ${PWD}/feature_extract/data/${llayer_nameayer}.mbtiles to tile files"
+    mkdir -p feature_extract/data/tiles
+    rm -rf feature_extract/data/tiles/${layer_name}
     docker run \
         --rm \
         -v "${PWD}/feature_extract/data":/input \
@@ -81,7 +86,7 @@ for layer in "${arr[@]}"; do
         ${mbutil_image_name} \
         mb-util \
             --image_format=pbf \
-            /input/${layer}.mbtiles \
-            /output/${layer}
+            /input/${layer_name}.mbtiles \
+            /output/${layer_name}
 
 done

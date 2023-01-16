@@ -167,5 +167,4 @@ cython_debug/
 
 # project-specific
 feature_extract/data/**/*
-!**/.gitkeep
 !iac/**/lib

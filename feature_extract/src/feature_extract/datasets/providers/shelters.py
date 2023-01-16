@@ -69,5 +69,8 @@ class Shelters(DatasetProvider):
     def get_required_field_names(self) -> List[str]:
         return [NAME_FIELD_NAME]
 
+    def get_colour_hex(self) -> str:
+        return "F34555"
+
 
 register_handler(Shelters())

@@ -14,11 +14,15 @@ export function App() {
       <Header />
       <ContactBadge />
 
-      <main className="h-screen">
-        <MapInterface />
-      </main>
-
-      {authenticated ? <PanelExtraction /> : <ModalAuthentication />}
+      {authenticated ?
+        <>
+          <main className="h-screen">
+            <MapInterface />
+          </main>
+          <PanelExtraction />
+        </> :
+        <ModalAuthentication />
+      }
     </>
   );
 }

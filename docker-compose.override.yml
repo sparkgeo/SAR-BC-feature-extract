@@ -2,55 +2,24 @@ version: '3.8'
 
 services:
 
-  minio:
-    image: minio/minio
-    env_file:
-      - ./minio/.env.creds
-    command: server /data
-    healthcheck:
-      test: curl -s http://localhost:9000 > /dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
-      interval: 5s
-      timeout: 1s
-      retries: 10
-    ports:
-      - 9001:9000
-
-  minio-client:
-    build:
-      context: ./minio/client
-    env_file:
-      - ./minio/.env.creds
-    environment:
-      MINIO_URL: http://minio:9000
-    depends_on:
-      minio:
-        condition: service_healthy
-
-  aws-cli:
-    image: amazon/aws-cli:2.4.22
-    env_file:
-      - ./minio/.env.creds
+  http-tile-server:
+    image: httpd:2.4
     volumes:
-      - ./feature_extract/data:/data
-    depends_on:
-      minio-client:
-        condition: service_completed_successfully
-    entrypoint: ""
-    command: sh -c "echo Uploading FileGeobuf data to minio...; ls -1 /data/*.fgb | xargs -I {} aws --endpoint-url http://minio:9000 s3 cp {} s3://fgb-data"
+      - ./feature_extract/data:/usr/local/apache2/htdocs
+    ports:
+      - 8987:80
 
   api:
-    image: tomfumb/bvsar-feature-extract-api
     ports:
       - 8023:80
-    env_file:
-      - ./minio/.env.creds
+    volumes:
+      - ${PWD}/feature_extract/data/fgb-data:/data
     environment:
-      # GDAL / FlatGeobuf config
-      AWS_S3_ENDPOINT: minio:9000
-      AWS_HTTPS: "NO"
-      AWS_VIRTUAL_HOSTING: "FALSE"
-      # API config
-      fgb_access_prefix: /vsis3/fgb-data
+      fgb_access_prefix: /data
+      mvt_bucket_name: tiles
+      s3_endpoint: http-tile-server
+      AWS_ACCESS_KEY_ID: required_but_not_used
+      AWS_SECRET_ACCESS_KEY: required_but_not_used
     command: uvicorn feature_extract_api.app:app --host 0.0.0.0 --port 80 --reload
     healthcheck:
       test: curl -s http://localhost/ > /dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
@@ -58,11 +27,10 @@ services:
       timeout: 1s
       retries: 10
     depends_on:
-      aws-cli:
-        condition: service_completed_successfully
+      - http-tile-server
 
   ui:
-    image: tomfumb/bvsar-feature-extract-ui
+    image: sparkgeo/sar-bc-feature-extract-ui
     build:
       context: .
       dockerfile: ./ui/Dockerfile
@@ -71,9 +39,8 @@ services:
     env_file:
       - ./ui/.env.docker
     volumes:
-      - source: ./ui
-        target: /app
-        type: bind
+      - ./ui:/asset-input
+      - /asset-input/node_modules
     depends_on:
       api:
         condition: service_healthy
