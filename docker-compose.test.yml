@@ -2,6 +2,13 @@ version: '3.8'
 
 services:
 
+  http-tile-server:
+    image: httpd:2.4
+    volumes:
+      - ./feature_extract/data:/usr/local/apache2/htdocs
+    ports:
+      - 8987:80
+
   api:
     build:
       args:
@@ -10,3 +17,8 @@ services:
     environment:
       fgb_access_prefix: /app/feature_extract/tests/data
       mvt_bucket_name: tiles
+      s3_endpoint: http-tile-server
+      AWS_ACCESS_KEY_ID: required_but_not_used
+      AWS_SECRET_ACCESS_KEY: required_but_not_used
+    depends_on:
+      - http-tile-server
