@@ -10,7 +10,6 @@ services:
       - 8987:80
 
   api:
-    image: tomfumb/bvsar-feature-extract-api
     ports:
       - 8023:80
     volumes:
@@ -31,7 +30,7 @@ services:
       - http-tile-server
 
   ui:
-    image: tomfumb/bvsar-feature-extract-ui
+    image: sparkgeo/sar-bc-feature-extract-ui
     build:
       context: .
       dockerfile: ./ui/Dockerfile

@@ -3,6 +3,7 @@ version: '3.8'
 services:
 
   api:
+    image: sparkgeo/sar-bc-feature-extract-api
     platform: linux/x86_64
     build:
       context: .

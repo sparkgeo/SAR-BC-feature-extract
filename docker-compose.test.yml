@@ -13,7 +13,7 @@ services:
     build:
       args:
         PIP_INSTALL_ARG: "[test]"
-    image: tomfumb/bvsar-feature-extract-api-test
+    image: sparkgeo/sar-bc-feature-extract-api-test
     environment:
       fgb_access_prefix: /app/feature_extract/tests/data
       mvt_bucket_name: tiles
