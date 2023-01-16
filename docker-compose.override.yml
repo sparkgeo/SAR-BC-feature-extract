@@ -10,13 +10,10 @@ services:
       - 8987:80
 
   api:
-    image: tomfumb/bvsar-feature-extract-api
     ports:
       - 8023:80
     volumes:
-      - type: bind
-        source: ${PWD}/feature_extract/data/fgb-data
-        target: /data
+      - ${PWD}/feature_extract/data/fgb-data:/data
     environment:
       fgb_access_prefix: /data
       mvt_bucket_name: tiles
@@ -33,7 +30,7 @@ services:
       - http-tile-server
 
   ui:
-    image: tomfumb/bvsar-feature-extract-ui
+    image: sparkgeo/sar-bc-feature-extract-ui
     build:
       context: .
       dockerfile: ./ui/Dockerfile
@@ -42,9 +39,8 @@ services:
     env_file:
       - ./ui/.env.docker
     volumes:
-      - source: ./ui
-        target: /app
-        type: bind
+      - ./ui:/asset-input
+      - /asset-input/node_modules
     depends_on:
       api:
         condition: service_healthy

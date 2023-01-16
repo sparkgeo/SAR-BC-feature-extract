@@ -1,13 +1,13 @@
 import { createContext, useState } from "react";
 
 export const AuthContext = createContext({
-  name: "",
+  user: "",
   pass: "",
   authenticated: false,
 });
 
 export function AuthContextProvider({ children }) {
-  const [authParams, setAuthParams] = useState({ name: "", pass: "" });
+  const [authParams, setAuthParams] = useState({ user: "", pass: "" });
   const [authenticated, setAuthenticated] = useState(false);
 
   return (
